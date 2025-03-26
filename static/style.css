@@ -1,0 +1,76 @@
+body{
+    font-weight: 600;
+    /* background-color: #3f3b4b; */
+}
+.invoiceUpper{
+    margin-top: 40px;
+    margin-left:20px;
+    display: flex;
+    flex-direction: column;
+    
+    border-bottom:1px solid black;
+}
+
+.invoiceMid{
+    margin-left:20px;
+    display: flex;
+    flex-direction: column;
+    border-bottom:1px solid black;
+
+}
+
+.invoiceLower{
+     margin-left:20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.invoiceLower th,td{
+    border: 1px solid black; 
+    padding: 8px;
+    text-align: center;
+}
+
+.invoiceLower table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.invoiceLower th{
+    background-color: #f2f2f2;
+}
+.invoiceFull{
+    align-items: center;
+}
+#invoiceheading{
+    margin-left:400px;
+}
+
+#part{
+    margin-left:30px ;
+}
+
+/* record Table for outBound; */
+.recordTable{
+    color:black;
+    background-color: rgba(128, 128, 128, 0.533);
+    border-collapse:collapse;
+    width:100%;
+}
+.recordTable th,td{
+    border: 1px solid black; 
+    padding: 8px;
+    text-align: left;
+}
+
+.recordTable th{
+    background-color: #fff;
+}
+.headingrecord{
+    color:aqua;
+}
+
+.headingrecord{
+    color:White;
+    margin-left:600px;
+}

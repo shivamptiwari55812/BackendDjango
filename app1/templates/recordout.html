@@ -1,0 +1,40 @@
+{% extends 'Layout.html' %}
+
+
+{% block title %}
+   
+   <h1> Outbound Records </h1>
+{% endblock  %}
+    
+
+{% block backgroundcss %}
+rgb(86, 48, 89)
+{% endblock backgroundcss %}
+    
+    
+    {% block content %}
+        <h1  class="headingrecord"> OutBound Records</h1>
+        <table class="recordTable">
+        <tr>
+       <th>Bill No.</th>
+       <th>Invoice No.</th>
+       <th>Bill Date</th>
+       <th>Receiver Company</th>
+       <th>Bill Pdf</th>
+        </tr>
+        
+        {% for bill in invoice_bill %}
+            <tr>
+              <td>{{bill.Bill_number}}</td>
+            <td>{{bill.Invoice_number}}</td>
+            <td>{{bill.Bill_date}}</td>
+        <td>{{bill.Receiver.ReceiverCompany_Name}}</td>
+        <td><a href="{{ bill.Bill_pdf.url }}" target="_blank">View PDF</a></td>
+
+            </tr>
+        {% endfor %}
+            
+        
+        </table>
+    {% endblock %}
+        
