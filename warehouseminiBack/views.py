@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import simpleSplit
-from app1.models import InvoiceBill  # Assuming your model is named InvoiceBill
+from invoice.models import InvoiceBill  # Assuming your model is named InvoiceBill
 
 def generate_bill_pdf(request, bill_id):
     # Try fetching invoice bill details, otherwise use default values

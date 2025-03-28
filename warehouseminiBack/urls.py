@@ -22,6 +22,11 @@ from .import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('app1/',include('app1.urls')),
+    path('inbound/',include('inbound.urls')),
+    path('invoice/',include('invoice.urls')),
+    path('outbound/',include('outbound.urls')),
+    path('registration/',include('registration.urls')),
+    path('transport/',include('transport.urls')),
    path("__reload__/",include("django_browser_reload.urls")),
     path('generate-bill/<int:bill_id>/', views.generate_bill_pdf, name='generate_bill_pdf'),
   

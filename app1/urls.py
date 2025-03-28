@@ -4,13 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .import views
 urlpatterns = [
-    
-    # path('eway',views.EWayBill,name='EWayBill'),
-    # path('pdf',views.generate_bill_pdf,name='generate_bill_pdf'),
-    path('submit_Form',views.submit_form_receiver,name="submit_Form"),
-    path('t',views.recordOutbound,name='recordOutbound'),
-    path('get-inventory-data',views.get_inventory_data,name='get_inventory_data'),
-    path('submit_Warehouseform',views.warehouseSet,name="warehouseSet"),
-    path('setTransporter',views.TransporterSet,name="TransporterSet"),
-  
+    path('add_item',views.add_item_inventory,name='add_item_inventory'),
+    path('del_product',views.del_product_inventory,name='del_product_inventory'),
+    path('edit_product',views.edit_product_inventory,name='edit_product_inventory'),
 ]
