@@ -27,7 +27,7 @@ def add_item_inventory(request):
          ProductQuantity = int(data.get("productQuantity",0)),
          ProductPrice =float(data.get("productPrice",0)),
          Product_Rejected = int(data.get("productRejected",0)),
-         Transaction_type = data.get("TransactionType","Inbound"),
+         Transaction_type = data.get("TransactionType",""),
         #  Warehouse = data.get("warehouse","")
        )
 
@@ -85,7 +85,14 @@ def edit_product_inventory(request):
     return JsonResponse({"message":"Invalid request"},status=400)
 
 
-
-
-
-
+@csrf_exempt
+def get_product_details(request):
+   if request.method == "GET":
+      try:
+         products_obj = Inventory.objects.all()
+         product_list = list(products_obj.values())
+         return JsonResponse({"message":"Data sent successfully","data":product_list},status=200)
+      except Exception as e:
+         return JsonResponse({"message":"Invalid request"},status=400)
+   else:
+      return JsonResponse({"message":"Invalid request"},status=400)

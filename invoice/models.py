@@ -7,7 +7,7 @@ from django.utils.timezone import now
 # Create your models here.
 class InvoiceBill(models.Model):
     
-    Invoice_number = models.CharField(max_length=100)
+    Invoice_number = models.CharField(max_length=100,null=False,blank=False)
     Bill_date = models.DateField(auto_now_add=True)
     Bill_number = models.IntegerField(null=True,blank=True)
     Bill_time = models.DateTimeField(auto_now=True)
