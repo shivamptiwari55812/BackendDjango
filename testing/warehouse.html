@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link rel="stylesheet" href="index.css">
+
+</head>
+<body>
+  <header class="admin-header">
+
+   <div class="admin-header__logo"> 
+    <img src="../person_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.png" alt="noImage" id="logo">
+    <span class="admin-header_Admin">Admin</span>
+  </div>
+
+    <div class="admin-header__search">
+     <div class="searchbar">
+     
+      <input type="text" placeholder="Search Here..." /> 
+      <img src="../icons8-search-50.png" alt="no image" class="searchlogo">
+     </div>
+
+
+      <div class="admin-header__actions">
+        <img src="../mail_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.png" alt="No image" title="Mail" class="Maillogo">
+      
+        <img src="../logout_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.png" alt="No image" title="Logout"class="logoutlogo">
+
+      
+       </div>
+      
+    
+    </div>
+
+   
+  </header>
+
+  <main>
+
+    <div class="leftside-content">
+      <div class="Navcontent">
+
+
+       <div class="outerdivDashnav">
+       <button id="dashboardnav"href="">Dashboard</button>
+       <div class="dropdown1">
+        <a href="home.html">Orders</a>
+       
+       </div>
+      </div>
+
+
+      <div class="outerdivshipment">
+       <button id="shipmentsnav"href="">Shipments</button>
+       <div class="dropdown2">
+        <a href="Status.html">Status</a>
+        <a href="Delivery.html">Delivery</a>
+       
+       </div>
+      </div>
+
+
+      <div class="outerdivinventory">
+       <button id="inventorynav"href="">Inventory</button>
+       <div class="dropdown3">
+        <a href="EditInv.html">Edit</a>
+        <a href="StockInv.html">StockList</a>
+        <a href="AlertInv.html">Alerts!</a>
+       </div>
+      </div>
+
+      <div class="outerdivwarehouse">
+       <button id="warehousenav"href="">Warehouse</button>
+      <div class="dropdown4">
+        <a href="Layout.html">Layout</a>
+      </div>
+      </div>
+
+      <div class="outerdivreports">
+       <button id="reportsnav"href="">Reports</button>
+       <div class="dropdown5">
+        <a href="annualRep.html">Annual</a>
+        <a href="Bills.html">Bills</a>
+
+       </div>
+     </div>
+    </div>
+  </div>
+
+
+  <div class="rightside-content">
+    
+    <div class="formwarehouse-container">
+        <h2>Fill all Required Details</h2>
+        <form id="setWarehouseForm" method="POST">
+            <label for="WarehouseCompany_Name">Warehouse Name:</label>
+            <input type="text" id="WarehouseCompany_Name" name="WarehouseCompanyName" required>
+
+            <label for="WarehouseCompany_Address">Warehouse Address:</label>
+            <input type="text" id="WarehouseCompany_Address" name="WarehouseCompanyAddress" required>
+
+            <label for="WarehouseCompany_City">Warehouse City:</label>
+            <input type="text" id="WarehouseCompany_City" name="WarehouseCompanyCity" required>
+
+            <label for="WarehouseCompany_GSTIN">Warehouse GSTIN:</label>
+            <input type="text" id="WarehouseCompany_GSTIN" name="WarehouseCompanyGSTIN" required>
+
+            <label for="WarehouseCompany_State">Warehouse State:</label>
+            <input type="text" id="WarehouseCompany_State" name="WarehouseCompanyState" required>
+
+            <label for="WarehouseCompany_Pincode">Warehouse Pincode:</label>
+            <input type="text" id="WarehouseCompany_Pincode" name="WarehouseCompany_Pincode" required>
+
+            <label for="WarehouseCompany_Contact">Warehouse Contact:</label>
+            <input type="text" id="WarehouseCompany_Contact" name="WarehouseCompany_Contact" required>
+
+            <label for="WarehouseCompany_Email">Warehouse Email:</label>
+            <input type="email" id="WarehouseCompany_Email" name="WarehouseCompany_Email" required>
+
+            <label for="TypeOfWarehouse">Type of Warehouse:</label>
+            <select id="TypeOfWarehouse" name="TypeOfWarehouse" required>
+                <option value="E-commerce">E-commerce</option>
+                <option value="Shipping">Shipping</option>
+                <option value="E-commerce & Shipping">Both</option>
+                
+            </select>
+
+            <label for="WarehouseAvailableorNot">Warehouse Status</label>
+            <select name="WarehouseStatus" id="WarehouseStatus">
+                <option value="True">Available</option>
+                <option value="False">NotAvailable</option>
+            </select>
+
+            <label for="WarehouseCompany_Capacity">Warehouse Capacity:</label>
+            <input type="text" id="WarehouseCompany_Capacity" name="WarehouseCompany_Capacity" required>
+
+            <button type="submit" id="submitFormwarehouse">Submit</button>
+        </form>
+    </div>
+    
+  </div>
+
+    
+
+  </main>
+  <script src="./index.js"></script>
+
+</body>
+</html>
+

@@ -51,3 +51,18 @@ def submit_form_receiver(request):
 
     return JsonResponse({"error":"Invalid request"},status=400)
 
+@csrf_exempt
+def get_details_bill(request):
+
+    if request.method == "GET":
+        try:
+            bill_obj = InvoiceBill.objects.all()
+            receiver_obj = ReceiverSide.objects.all()
+            receiver_list = list(receiver_obj.values())
+            bill_list = list(bill_obj.values())
+          
+            return JsonResponse({"message":"Data sent successfully","data":{"receivers": receiver_list, "bills": bill_list}},status=200)
+        except Exception as e:
+            return JsonResponse({"message":"Invalid request"},status=400)
+    else:
+        return JsonResponse({"message":"Invalid request"},status=400)

@@ -6,5 +6,5 @@ from .import views
 
 urlpatterns = [
     path('submit_Form',views.submit_form_receiver,name='submit_form_receiver'),
-    # path('',views.submit_form_receiver,name='submit_form_receiver'),
+    path('get-inventory-data',views.get_details_bill,name='get_details_bill'),
 ]

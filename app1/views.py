@@ -11,7 +11,8 @@ from registration.models import Warehouse
 from inbound.models import SendersSide
 from outbound.models import ReceiverSide
 from .models import Inventory
-
+from django.shortcuts import get_object_or_404
+from .utils.email_service import send_warehouse_email
 
 
 @csrf_exempt
@@ -28,7 +29,7 @@ def add_item_inventory(request):
          ProductPrice =float(data.get("productPrice",0)),
          Product_Rejected = int(data.get("productRejected",0)),
          Transaction_type = data.get("TransactionType",""),
-        #  Warehouse = data.get("warehouse","")
+         ProductRestock = data.get("productRestock",0),
        )
 
        return JsonResponse({"message":"Saved Successfully"},status=200)
@@ -87,6 +88,7 @@ def edit_product_inventory(request):
 
 @csrf_exempt
 def get_product_details(request):
+
    if request.method == "GET":
       try:
          products_obj = Inventory.objects.all()
@@ -96,3 +98,22 @@ def get_product_details(request):
          return JsonResponse({"message":"Invalid request"},status=400)
    else:
       return JsonResponse({"message":"Invalid request"},status=400)
+
+@csrf_exempt   
+def get_product_foredit(request, product_id):  # ✅ Accept product_id here
+    product = get_object_or_404(Inventory, id=product_id)  # ✅ Lookup by ID
+
+    return JsonResponse({
+        "ProductName": product.ProductName,
+        "ProductPrice": float(product.ProductPrice),
+        "ProductQuantity": product.ProductQuantity,
+        "Product_Rejected": product.Product_Rejected,
+        "ProductRestock": product.ProductRestock,
+        "ProductCategory": product.ProductCategory,
+        "Transaction_type": product.Transaction_type,
+    })
+
+def sent_notification(request):
+   send_warehouse_email()
+   return JsonResponse({"message":"Email sent successfully"},status=200)
+

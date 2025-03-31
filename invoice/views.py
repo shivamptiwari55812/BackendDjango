@@ -7,6 +7,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import os
 from .models import InvoiceBill
+from app1.models import Inventory
+from django.conf import settings
+from .utils.email_services import send_mail_warehouse
 # Create your views here.
 
 
@@ -58,9 +61,26 @@ def generate_invoice_pdf(invoice_id):
  
 @csrf_exempt
 def get_invoice_pdf(request,invoice_id):
+     
      file_path = generate_invoice_pdf(invoice_id)
 
      if file_path:
          return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
      else:
          return JsonResponse({'error': 'Invoice not found'}, status=404)
+     
+
+@csrf_exempt
+def automate_email(request):
+    inventory_obj = Inventory.objects.all()
+    try:
+        if( inventory_obj.status== 'OutofStock'):
+            Subject= "Automated mail to place order for the ${inventory_obj.ProductName}"
+            Warehouse = "${inventory_obj.Warehouse.WarehouseCompany_Name} System this side ," \
+            " We need to place the order for the ${inventory_obj.ProductName} to you , The Product Quantity will be ${inventory_obj.ProductRestock}" \
+            " We Hope you will reach us on this as soon as possible "
+            Recipient_list =["${inventory_obj.SendersSide.Sender_Email}"]
+            send_mail_warehouse(Subject,Warehouse,Recipient_list,settings.EMAIL_HOST_USER)
+
+    except Exception as e:
+        return JsonResponse({"message":"Invalid request"},status=400)

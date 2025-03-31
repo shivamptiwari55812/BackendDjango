@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="testings.css">
+</head>
+<body>
+    <div class="form-container" style="display: none;">
+        <h2> Add Product</h2>
+        <form id="productForm">
+            
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" required>
+
+            <label for="price">Price (₹):</label>
+            <input type="number" id="price" min="0"required>
+
+            <label for="quantity">Stock Quantity:</label>
+            <input type="number" id="quantity" min="0" required>
+            
+            <label for="productRejected">Product rejected:</label>
+            <input type="number" id="productRejected" min="0" required>
+            
+            <label for="category">Category:</label>
+            <div class="category-container">
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option>Electronics</option>
+                    <option>Automotive Accessories</option>
+                    <option>Tyres & Rubber Products</option>
+                    <option>Heavy Equipment Parts</option>
+                </select>
+                <!-- <input type="text" id="newCategory" placeholder="Add New Category"> -->
+                <button type="button" id="addCategory">+</button>
+            </div>
+
+            <label for="TransactionType">Transaction Type:</label>
+            <div class="radio-group" id="TransactionType">
+                <label><input type="radio"  name="TransactionType" value="Inbound" required> Inbound</label>
+                <label><input type="radio" name="TransactionType" value="Outbound"> Outbound</label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Submit</button>
+                <button type="reset">Reset</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="tablecontainer">
+        <table id="productTable">
+            <thead>~
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>TransactionType</th>
+                    <th>No of Rejected Product</th>
+                    <th>Edit/delete</th>
+                </tr>
+            </thead>
+            <tbody id="tablebody">
+              
+            </tbody>
+        </table>
+    </div>
+    <script src="jsFiles/inventory.js"></script>
+</body>
+</html>
