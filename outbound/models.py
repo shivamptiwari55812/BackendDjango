@@ -10,6 +10,7 @@ class ReceiverSide(models.Model):
     Receiver_State = models.CharField(max_length=100)
     Receiver_Contact = models.CharField(max_length=30)
     Receiver_Email = models.EmailField(max_length=100)
+    ModeOfTransport = models.CharField(max_length=100,blank=True,null=True,default = 'By Road')  
 
     def __str__(self):
         return self.ReceiverCompany_Name

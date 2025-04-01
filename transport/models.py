@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Transporter(models.Model):
     TransporterName = models.CharField(max_length=100,null=True,blank=True)
     TransporterAddress = models.CharField(max_length=100,null=True,blank=True)
@@ -8,12 +7,10 @@ class Transporter(models.Model):
     Transporter_Email = models.EmailField(max_length=100,null=True,blank=True)
 
     def __str__(self):
-        return self.TransporterName
-
+        return self.TransporterName  if self.TransporterName else "Unnamed Transporter"
 
 class Driver(models.Model):
     Driver_Name = models.CharField(max_length=100,null=False,blank=False)
-    # Driver_Id = models.CharField(auto_created=True)
     Driver_Contact = models.CharField(max_length=20)
     Driver_Email = models.EmailField(max_length=100,null=True,blank=True)
     Vehicle_Number = models.CharField(max_length=100, null=True, blank=True)

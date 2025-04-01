@@ -4,6 +4,8 @@ from .models import ReceiverSide
 from transport.models import Transporter,Driver
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.conf import settings
+from .utils.email_service import send_mail
 import json
 # Create your views here.
 @csrf_exempt
@@ -25,7 +27,30 @@ def submit_form_receiver(request):
                 Receiver_Email =data.get("receiverCompanyEmail","")
                  )
             
-            
+            message = """Dear {receiver_name},
+
+We have successfully received your outbound shipment request. Our team is now reviewing the details, and we will begin processing your order shortly.
+
+You will receive further updates as we proceed. If you have any questions, feel free to reach out to us.
+
+Thank you for choosing WarehouseMini!
+
+Best Regards,  
+WarehouseMini Team  
+📞 Contact: 98997975743  
+📧 Email: supportTotal@gmail.com 
+"""
+
+            send_mail(
+                "Order Received /Confirmation Mail",
+                message.format(
+                    receiver_name=Receiver_obj.ReceiverCompany_Name,  
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[data.get("receiverCompanyEmail","")]
+
+            )
+
             print(Receiver_obj)
 
             InvoiceBill_obj = InvoiceBill.objects.create(
@@ -53,7 +78,6 @@ def submit_form_receiver(request):
 
 @csrf_exempt
 def get_details_bill(request):
-
     if request.method == "GET":
         try:
             bill_obj = InvoiceBill.objects.all()
@@ -66,3 +90,4 @@ def get_details_bill(request):
             return JsonResponse({"message":"Invalid request"},status=400)
     else:
         return JsonResponse({"message":"Invalid request"},status=400)
+    

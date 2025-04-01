@@ -9,7 +9,7 @@ class InvoiceBill(models.Model):
     
     Invoice_number = models.CharField(max_length=100,null=False,blank=False)
     Bill_date = models.DateField(auto_now_add=True)
-    Bill_number = models.IntegerField(null=True,blank=True)
+    Bill_number = models.CharField(max_length=20,null=True,blank=True)
     Bill_time = models.DateTimeField(auto_now=True)
     Bill_validity = models.DateField()
     ValueOfGoods = models.IntegerField(default=0)
@@ -28,10 +28,10 @@ class InvoiceBill(models.Model):
 
 
 
-def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         if not self.Bill_number:  
             self.Bill_number = self.generate_bill_number()
         super().save(*args, **kwargs)
-def generate_bill_number():
-    return f"BILL-{now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+    def generate_bill_number(self):
+     return f"BILL-{now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
 

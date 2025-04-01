@@ -5,5 +5,5 @@ from django.conf.urls.static import static
 from .import views
 
 urlpatterns = [
-    path('pdf/<int:invoice_id>/',views.get_invoice_pdf,name='get_invoice_pdf'),
+    path('pdf/<str:Invoice_number>/',views.generate_invoice_pdf,name='generate_invoice_pdf'),
 ]
