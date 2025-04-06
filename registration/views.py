@@ -15,6 +15,10 @@ def warehouseSet(request):
             print(request.body)
             data = json.loads(request.body)
 
+            # if not request.user.is_authenticated:
+            #  return JsonResponse({"message":"User not authenticated"},status=401)
+
+
             warehouse_obj =Warehouse.objects.create(
             WarehouseCompany_Name=data.get("warehouseName"),
             WarehouseAddress=data.get("warehouseAddress"),

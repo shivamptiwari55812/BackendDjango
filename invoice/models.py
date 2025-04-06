@@ -2,6 +2,7 @@ from django.db import models
 from registration.models import Warehouse
 from transport.models import Transporter,Driver
 from outbound.models import ReceiverSide
+from inbound.models import SendersSide
 import uuid
 from django.utils.timezone import now
 # Create your models here.
@@ -19,10 +20,8 @@ class InvoiceBill(models.Model):
     Bill_pdf = models.FileField(upload_to='bills/', default='default_bill.pdf')
 
     # Relationships
-    Warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,null=True,blank=True)
     Receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE,null=True,blank=True)
-    Transporter = models.ForeignKey(Transporter, on_delete=models.CASCADE,null=True,blank=True)
-    Driver = models.ForeignKey(Driver, on_delete=models.CASCADE,null=True,blank=True)
+    Sender = models.ForeignKey(SendersSide, on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return f"Invoice {self.Invoice_number} - {self.Bill_number}"
 

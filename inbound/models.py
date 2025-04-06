@@ -1,7 +1,8 @@
 from django.db import models
 import uuid
 from django.utils.timezone import now
-from invoice.models import InvoiceBill
+# from invoice.models import InvoiceBill
+from registration.models import Warehouse
 
 
 # Create your models here.
@@ -12,8 +13,7 @@ class SendersSide(models.Model):
     Sender_Email = models.EmailField(max_length=100)
 
     # Relationship
-    Invoice = models.ForeignKey(InvoiceBill, on_delete=models.CASCADE,null=True,blank=True)
-
+    Warehouse = models.ForeignKey('registration.Warehouse', on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return self.SenderCompany_Name
     

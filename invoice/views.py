@@ -16,18 +16,28 @@ from .utils.email_services import send_mail_warehouse
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 # Create your views here.
-# @csrf_exempt
-def generate_invoice_pdf(request, Invoice_number):
+@csrf_exempt
+def generate_invoice_pdf(request,Invoice_number):
     try:
-        invoice = InvoiceBill.objects.get(Invoice_number=Invoice_number)
-        warehouse = Warehouse.objects.first()
+        # if not request.user.is_authenticated:
+        #   return JsonResponse({"message":"User not authenticated"},status=401)
+
+        invoice = InvoiceBill.objects.filter(Invoice_number=Invoice_number)
+
+        if not invoice.exists():
+            return JsonResponse({"message": "Invoice not found"}, status=404)
+        invoice = invoice.first()
+        try:
+         warehouse = Warehouse.objects.first()
+        except Exception as e:  
+            return JsonResponse({"message": "Warehouse not found"}, status=404)
         receiver = ReceiverSide.objects.first()
         transporter = Transporter.objects.first()
         driver = Driver.objects.first()
     except InvoiceBill.DoesNotExist:
         return JsonResponse({"message": "Invoice not found"}, status=404)
 
-    file_path = f'media/invoices/{invoice.Bill_number}.pdf'
+    file_path = f'media/invoices/{invoice.Invoice_number}.pdf'
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     c = canvas.Canvas(file_path, pagesize=letter)
@@ -51,49 +61,49 @@ def generate_invoice_pdf(request, Invoice_number):
 
     c.setFont("Helvetica-Bold", 12)
     c.drawString(50, part_a_start_y, "PART-A")
-
     part_a_data = [
-        ["GSTIN Of Supplier:", warehouse.WarehouseGSTIN],
-        ["Place of Dispatch:", warehouse.WarehouseAddress],
-        ["GSTIN of Recipient:", receiver.Receiver_GSTIN],
-        ["Place of Receipt:", receiver.Receiver_Address],
-        ["Document Number:", invoice.Bill_number],
-        ["Value of Goods:", str(invoice.ValueOfGoods)],
-        ["Reason for Transport:", invoice.ReasonForTransport],
-        ["CEWB No:", str(invoice.CEWBno)]
+    ["GSTIN Of Supplier:", getattr(warehouse, 'WarehouseGSTIN', '')],
+    ["Place of Dispatch:", getattr(warehouse, 'WarehouseAddress', '')],
+    ["GSTIN of Recipient:", getattr(receiver, 'Receiver_GSTIN', '')],
+    ["Place of Receipt:", getattr(receiver, 'Receiver_Address', '')],
+    ["Document Number:", getattr(invoice, 'Bill_number', '')],
+    ["Value of Goods:", str(getattr(invoice, 'ValueOfGoods', ''))],
+    ["Reason for Transport:", getattr(invoice, 'ReasonForTransport', '')],
+    ["CEWB No:", str(getattr(invoice, 'CEWBno', ''))]
     ]
 
     y = part_a_start_y - 30
     for label, value in part_a_data:
-        c.setFont("Helvetica-Bold", 10)
-        c.drawString(50, y, label)
-        c.setFont("Helvetica", 10)
-        c.drawString(200, y, str(value))
-        y -= line_spacing  # Increased spacing
+      c.setFont("Helvetica-Bold", 10)
+      c.drawString(50, y, label)
+      c.setFont("Helvetica", 10)
+      c.drawString(200, y, str(value))
+      y -= line_spacing  # Increased spacing
 
     # PART-B
     part_b_start_y = y - 20  # Less gap between A and B
     c.setFont("Helvetica-Bold", 12)
     c.drawString(50, part_b_start_y, "PART-B")
 
-    # 🚀 FIX: Add Right Margin to Table
+# 🚀 FIX: Add Right Margin to Table
     table_width = 512  # Keeping 50px margin on left & right
     col_widths = [60, 80, 70, 110, 90, 50, 100]  # Adjusted for proper alignment
 
-    formatted_entered_date = invoice.Bill_time.strftime('%d-%m-%Y %H:%M:%S')  # Improved Date Format
+    formatted_entered_date = invoice.Bill_time.strftime('%d-%m-%Y %H:%M:%S') if invoice.Bill_time else 'N/A'  # Handle None case
 
     transport_data = [
-        ["Mode", "Vehicle No", "From", "Entered Date", "Entered By", "CEWB No", "Multi Vehicle Info"],
-        [
-            str(receiver.ModeOfTransport or ''),
-            str(driver.Vehicle_Number or ''),
-            str(warehouse.WarehouseCity or ''),
-            formatted_entered_date,  # Improved date format
-            str(warehouse.WarehouseGSTIN or ''),
-            str(invoice.CEWBno or ''),
-            str(invoice.MultiVehInfo or '')
-        ]
+     ["Mode", "Vehicle No", "From", "Entered Date", "Entered By", "CEWB No", "Multi Vehicle Info"],
+     [
+        str(receiver.ModeOfTransport or ''),
+        str(driver.Vehicle_Number if driver else ''),  # Safe check for driver
+        str(warehouse.WarehouseCity or ''),
+        formatted_entered_date,  # Improved date format
+        str(warehouse.WarehouseGSTIN or ''),
+        str(invoice.CEWBno or ''),
+        str(invoice.MultiVehInfo or '')
+     ]
     ]
+
 
     table = Table(transport_data, colWidths=col_widths)
 
@@ -112,21 +122,13 @@ def generate_invoice_pdf(request, Invoice_number):
     table.drawOn(c, 50, part_b_start_y - 50)  # Keeps 50px margin from the left
 
     c.save()
-    return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+    # return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+    return file_path
+
+
 
 # @csrf_exempt
-# def get_invoice_pdf(request,invoice_id):
-     
-#      file_path = generate_invoice_pdf(invoice_id)
-
-#      if file_path:
-#          return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
-#      else:
-#          return JsonResponse({'error': 'Invoice not found'}, status=404)
-     
-
-@csrf_exempt
-def automate_email(request):
+# def automate_email(request):
     inventory_obj = Inventory.objects.all()
     try:
         if( inventory_obj.status== 'OutofStock'):

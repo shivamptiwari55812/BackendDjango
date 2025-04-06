@@ -24,6 +24,7 @@ urlpatterns = [
     path('app1/',include('app1.urls')),
     path('inbound/',include('inbound.urls')),
     path('invoice/',include('invoice.urls')),
+    # path('userModel/',include('userModel.urls')),
     path('outbound/',include('outbound.urls')),
     path('registration/',include('registration.urls')),
     path('transport/',include('transport.urls')),
