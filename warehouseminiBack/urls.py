@@ -21,6 +21,8 @@ from django.conf.urls.static import static
 from .import views
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('signup1',views.signup,name='signup'),
+    path('login1',views.login_view,name='login_view'),
     path('app1/',include('app1.urls')),
     path('inbound/',include('inbound.urls')),
     path('invoice/',include('invoice.urls')),
@@ -29,7 +31,6 @@ urlpatterns = [
     path('registration/',include('registration.urls')),
     path('transport/',include('transport.urls')),
    path("__reload__/",include("django_browser_reload.urls")),
-    path('generate-bill/<int:bill_id>/', views.generate_bill_pdf, name='generate_bill_pdf'),
   
 ]+ static(settings.MEDIA_URL ,document_root=settings.MEDIA_ROOT)
 
