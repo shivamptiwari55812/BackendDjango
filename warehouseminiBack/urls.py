@@ -21,8 +21,10 @@ from django.conf.urls.static import static
 from .import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('signup1',views.signup,name='signup'),
-    path('login1',views.login_view,name='login_view'),
+    path('verify_otp',views.verify_otp,name='verify_otp'),
+    path('verify_login_otp',views.verify_login_otp,name='verify_login_otp'),
+    path('SignUpview',views.SignUpview,name='SignUpview'),
+    path('login1',views.loginView,name='loginView'),
     path('app1/',include('app1.urls')),
     path('inbound/',include('inbound.urls')),
     path('invoice/',include('invoice.urls')),

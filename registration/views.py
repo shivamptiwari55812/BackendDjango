@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .models import Warehouse
+import random
+from .models import Warehouse,OTP
 # Create your views here.
 
 
@@ -39,3 +40,12 @@ def warehouseSet(request):
             return JsonResponse({"error":"Invalid shit"},status=400)
         
     return JsonResponse({"Message":"Invalid request"},status=404)
+
+
+
+def generate_and_store_otp(user):
+    otp_code = random.randint(100000,999999)
+
+    otp_instance =OTP.objects.create(user=user,code=str(otp_code))
+
+    return otp_code

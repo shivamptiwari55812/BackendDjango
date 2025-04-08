@@ -17,4 +17,3 @@ class ReceiverSide(models.Model):
         return self.ReceiverCompany_Name
     
 
-

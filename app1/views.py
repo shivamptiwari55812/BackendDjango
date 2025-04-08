@@ -4,13 +4,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import uuid
 import json
-# from app1.models import ReceiverSide, InvoiceBill ,Transporter,Driver,Warehouse
+from django.db.models import Sum
 from invoice.models import InvoiceBill
 from transport.models import Transporter,Driver
 from registration.models import Warehouse
 from inbound.models import SendersSide
 from outbound.models import ReceiverSide
 from .models import Inventory
+from django.contrib.auth.models import User
+
 from django.shortcuts import get_object_or_404
 from .utils.email_service import send_warehouse_email
 
@@ -67,29 +69,26 @@ def del_product_inventory(request):
     return JsonResponse({"message":"Invalid request"},status=400)
 
 @csrf_exempt
-def edit_product_inventory(request, productid):
+def edit_product_inventory(request):
     if request.method == 'PUT':
        try:
           data = json.loads(request.body)
           print(data)
-         
-         #  if not request.user.is_authenticated:
-         #   return JsonResponse({"message":"User not authenticated"},status=401)
 
+          product_id = request.GET.get('product_id')
 
-          product_ID = data.get("product_id")
-
-          product_obj = Inventory.objects.filter(Product_id=product_ID).first()
+          product_obj = Inventory.objects.filter(id=product_id).first()
 
           if not product_obj:
              return JsonResponse ({"message":"Product not found"},status =404)
           
-          product_obj.ProductName = data.get("productName",product_obj.ProductName)
-          product_obj.ProductCategory = data.get("productCategory",product_obj.ProductCategory) 
-          product_obj.ProductQuantity = data.get("productQuantity",product_obj.ProductQuantity) 
-          product_obj.ProductPrice = data.get("productPrice",product_obj.ProductPrice)
-          product_obj.Product_Rejected = data.get("productRejected",product_obj.Product_Rejected)
-          product_obj.Transaction_type = data.get("transactionType",product_obj.Transaction_type)
+          product_obj.ProductName = data.get("ProductName",product_obj.ProductName)
+          product_obj.ProductCategory = data.get("ProductCategory",product_obj.ProductCategory) 
+          product_obj.ProductQuantity = int(data.get("ProductQuantity",product_obj.ProductQuantity)) 
+          product_obj.ProductPrice = float(data.get("ProductPrice",product_obj.ProductPrice))
+          product_obj.Product_Rejected = int(data.get("ProductRejected",product_obj.Product_Rejected))
+          product_obj.ProductRestock = int(data.get("ProductRestock",product_obj.ProductRestock))
+          product_obj.Transaction_type = data.get("TransactionType",product_obj.Transaction_type)
           product_obj.save()
           return JsonResponse({"message":"Product updated successfully"},status=200)
        except Exception as e:
@@ -102,9 +101,6 @@ def get_product_details(request):
 
    if request.method == "GET":
       try:
-         # if not request.user.is_authenticated:
-         #  return JsonResponse({"message":"User not authenticated"},status=401)
-
          products_obj = Inventory.objects.all()
          product_list = list(products_obj.values())
          return JsonResponse({"message":"Data sent successfully","data":product_list},status=200)
@@ -114,11 +110,11 @@ def get_product_details(request):
       return JsonResponse({"message":"Invalid request"},status=400)
 
 @csrf_exempt   
-def get_product_foredit(request, product_id):  # ✅ Accept product_id here
-    product = get_object_or_404(Inventory, id=product_id)  # ✅ Lookup by ID
-    
-   #  if not request.user.is_authenticated:
-   #        return JsonResponse({"message":"User not authenticated"},status=401)
+def get_product_foredit(request): 
+    product_id = request.GET.get("product_id")
+    if not product_id:
+       return JsonResponse({"error": "Product ID is required"}, status=400)
+    product = get_object_or_404(Inventory, id=product_id)  
 
     return JsonResponse({
         "ProductName": product.ProductName,
@@ -130,7 +126,26 @@ def get_product_foredit(request, product_id):  # ✅ Accept product_id here
         "Transaction_type": product.Transaction_type,
     })
 
+
+
 def sent_notification(request):
+   
    send_warehouse_email()
    return JsonResponse({"message":"Email sent successfully"},status=200)
 
+
+
+@csrf_exempt
+def totalItems(request):
+ try:
+   if request.method == "GET":
+      total_items = Inventory.objects.aggregate(total_items=Sum('ProductQuantity'))
+      print(total_items)
+      if total_items is None:
+         return JsonResponse({"total_items": 0}, status=200)
+      else:
+         return JsonResponse({"total_items": total_items}, status=200)   
+   else:
+      return JsonResponse({"error": "Invalid request"}, status=400)
+ except Exception as e:
+    return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
