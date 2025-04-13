@@ -6,8 +6,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
 from .utils.email_service import send_mail,EmailMessage
+from invoice.models import InvoiceBill
+from transport.models import Transporter,Driver
 from invoice.views import generate_invoice_pdf
 import json
+
+import logging
+logger = logging.getLogger(__name__)
 # Create your views here.
 @csrf_exempt
 def submit_form_receiver(request):
@@ -25,15 +30,16 @@ def submit_form_receiver(request):
             
 
             Receiver_obj = ReceiverSide.objects.create(
-                ReceiverCompany_Name = data.get("receiverCompanyName",""),
-                Receiver_Address =data.get("receiverCompanyAddress",""),
-                Receiver_City = data.get("receiverCompanyCity",""),
-                Receiver_GSTIN = data.get("receiverCompanyGSTIN",""),
-                Receiver_State = data.get("receiverCompanyState",""),
-                Receiver_Contact=data.get("receiverCompanyContact",""),
-                Receiver_Email =data.get("receiverCompanyEmail","")
-                 )
-           
+                ReceiverCompany_Name = data.get("ReceiverCompany_Name",""),
+                Receiver_Address =data.get("ReceiverCompany_Address",""),
+                Receiver_City = data.get("ReceiverCompany_City",""),
+                Receiver_GSTIN = data.get("ReceiverCompany_GSTIN",""),
+                Receiver_State = data.get("ReceiverCompany_State",""),
+                Receiver_Contact=data.get("ReceiverCompany_Contact",""),
+                Receiver_Email =data.get("ReceiverCompany_Email",""),
+                ModeOfTransport = data.get("ModeOfTransport",""),
+                 
+            )
             message = """Dear {receiver_name},
 
 We have successfully received your outbound shipment request. Our team is now reviewing the details, and we will begin processing your order shortly.
@@ -54,30 +60,11 @@ WarehouseMini Team
                     receiver_name=Receiver_obj.ReceiverCompany_Name,  
                 ),
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[data.get("receiverCompanyEmail","")]
+                recipient_list=[data.get("ReceiverCompany_Email","")]
 
             )
 
-            InvoiceBill_obj = InvoiceBill.objects.create(
-                Invoice_number= data.get("invoiceNumber"),
-                ReasonForTransport= data.get("reasonForTransport",""),
-                MultiVehInfo = data.get("multiVehInfo",0),
-                CEWBno =data.get("cewbNo",0),
-                ValueOfGoods = data.get("valueOfGoods",0),
-                Bill_validity = data.get("ValidityBill","")
-                 )
-
-            Transporter_obj = Transporter.objects.create(
-                TransporterName = data.get("TransporterName","")
-                )
-
-            Driver_obj = Driver.objects.create(
-                Vehicle_Number = data.get("vehicleNumber","MH7804")
-                ) 
-           
-            pdf_file = generate_invoice_pdf(data.get("invoiceNumber","")) 
-            print(pdf_file)
-            return JsonResponse({"message":"Data fetched Successully","pdf-file":pdf_file},status =200)
+            return JsonResponse({"message":"Data fetched Successully"},status =200)
         
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -86,39 +73,19 @@ WarehouseMini Team
 
 
 
+
 @csrf_exempt
-def get_details_bill(request):
+def getOrdersDetails(request):
     if request.method == "GET":
         try:
-            bill_obj = InvoiceBill.objects.all()
+            invoice_obj = InvoiceBill.objects.all()
             receiver_obj = ReceiverSide.objects.all()
             receiver_list = list(receiver_obj.values())
-            bill_list = list(bill_obj.values())
-          
-            return JsonResponse({"message":"Data sent successfully","data":{"receivers": receiver_list, "bills": bill_list}},status=200)
+            invoice_list = list(invoice_obj.values())
+            
+            return JsonResponse({"message":"Data sent successfully","invoices":invoice_list,"receiver":receiver_list},status=200)
         except Exception as e:
-            return JsonResponse({"message":"Invalid request"},status=400)
+            logger.error(f"An error occurred: {e}")
+            return JsonResponse({"message": "An error occurred while processing the request"}, status=500)
     else:
-        return JsonResponse({"message":"Invalid request"},status=400)
-    
-
-def automate_pdf_email(invoice_number):
-    try:
-        invoice_obj = InvoiceBill.objects.filter(Invoice_number=invoice_number).first()
-        receiver_obj = ReceiverSide.objects.filter(ReceiverCompany_Email=invoice_obj.ReceiverCompany_Email).first()
-        # pdf_file = generate_invoice_pdf(invoice_number)
-        # file_path = f'media/invoices/{invoice_obj.Invoice_number}.pdf'
-        email = EmailMessage(
-            "Invoice PDF",
-            "Please find the attached invoice PDF file.",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[receiver_obj.ReceiverCompany_Email],
-        )
-
-        # email.attach_file(pdf_file)
-        email.send()
-        return JsonResponse({"message":"Email sent successfully"},status=200)   
-
-    except Exception as e:
-        return JsonResponse({"message":"Invalid request"},status=400)
-
+        return JsonResponse({"message":"Invalid request"},status=405)

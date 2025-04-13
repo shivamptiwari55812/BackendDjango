@@ -79,11 +79,21 @@ def loginView(request):
             else:
                 OTP.objects.filter(user=user).delete()
                 otp_code = generate_and_store_otp(user)
-                message = f"""Dear {form_data['username']},
-                Here is OTP for Login :-  {otp_code}
-                Best regards,
-                TG Corporation Team
-                """
+                
+                message= f"""Dear {form_data['username']},
+
+
+
+
+                                   Here is OTP for Login :-  {otp_code}
+
+
+
+
+
+                             Best regards,
+                             TG Corporation Team
+                          """
 
                 send_mail(
                 subject="OTP Verification for Login",
@@ -104,16 +114,18 @@ def loginView(request):
 
 
 def logoutView(request):
-
+ if request.method == "POST":
     logout()
-    return JsonResponse({"message": "Logged out successfully"}, status=200)
-
+    return JsonResponse({"message": "Logout successfull"}, status=200)
+ else:
+    return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
 @csrf_exempt
 def verify_otp(request):
     if request.method == "POST":
         try:
+            print(request.body)
             data = json.loads(request.body)
             email = data.get("email")
             otp = data.get("otp")
@@ -153,7 +165,8 @@ def verify_login_otp(request):
                   if user is not None:
                       otp_obj = OTP.objects.filter(user=user).latest('created_at')
                       if otp_obj.code == otp and not otp_obj.is_expired():
-                          return JsonResponse({"message": "Verification successful"}, status=200)
+                          login(request, user)
+                          return JsonResponse({"message": "Verification login successful"}, status=200)
                       else:
                           return JsonResponse({"message": "Invalid or expired OTP"}, status=400)
                   else:

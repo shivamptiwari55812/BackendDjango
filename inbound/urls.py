@@ -7,4 +7,5 @@ from .import views
 urlpatterns = [
     
     path('t',views.recordInbound,name='recordInbound'),
+    path('orderForm',views.orderForm,name='orderForm'),
 ]

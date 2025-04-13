@@ -4,6 +4,8 @@ from transport.models import Transporter,Driver
 from outbound.models import ReceiverSide
 from inbound.models import SendersSide
 import uuid
+from django.db.models import URLField
+from cloudinary.models import CloudinaryField
 from django.utils.timezone import now
 # Create your models here.
 class InvoiceBill(models.Model):
@@ -17,7 +19,7 @@ class InvoiceBill(models.Model):
     ReasonForTransport = models.TextField()
     CEWBno = models.IntegerField()
     MultiVehInfo = models.IntegerField()
-    Bill_pdf = models.FileField(upload_to='bills/', default='default_bill.pdf')
+    Bill_pdf = URLField(null=True,blank=True)
 
     # Relationships
     Receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE,null=True,blank=True)

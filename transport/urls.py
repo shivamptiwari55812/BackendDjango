@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from .import views
 
 urlpatterns = [
-    path('submit_Transporter',views.TransporterSet,name='TransporterSet'),
-    path('submit_Driver',views.Driverget,name='Driverget'),
+    path('saveDetails',views.getDetails,name='getDetails'),
     path('save_location',views.saveLocation,name='saveLocation'),
 ]

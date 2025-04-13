@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+from cloudinary.uploader import upload
 from django.http import JsonResponse,FileResponse
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -12,12 +13,14 @@ from app1.models import Inventory
 from transport.models import Transporter,Driver
 from outbound.models import ReceiverSide
 from django.conf import settings
-from .utils.email_services import send_mail_warehouse
+from .utils.email_services import send_email_with_pdf
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+import logging
+logger = logging.getLogger(__name__)
 # Create your views here.
 @csrf_exempt
-def generate_invoice_pdf(request,Invoice_number):
+def generate_invoice_pdf(Invoice_number):
     try:
         # if not request.user.is_authenticated:
         #   return JsonResponse({"message":"User not authenticated"},status=401)
@@ -129,15 +132,83 @@ def generate_invoice_pdf(request,Invoice_number):
 
 # @csrf_exempt
 # def automate_email(request):
-    inventory_obj = Inventory.objects.all()
-    try:
-        if( inventory_obj.status== 'OutofStock'):
-            Subject= "Automated mail to place order for the ${inventory_obj.ProductName}"
-            Warehouse = "${inventory_obj.Warehouse.WarehouseCompany_Name} System this side ," \
-            " We need to place the order for the ${inventory_obj.ProductName} to you , The Product Quantity will be ${inventory_obj.ProductRestock}" \
-            " We Hope you will reach us on this as soon as possible "
-            Recipient_list =["${inventory_obj.SendersSide.Sender_Email}"]
-            send_mail_warehouse(Subject,Warehouse,Recipient_list,settings.EMAIL_HOST_USER)
+#     inventory_obj = Inventory.objects.all()
+#     try:
+#         if( inventory_obj.status== 'OutofStock'):
+#             Subject= "Automated mail to place order for the ${inventory_obj.ProductName}"
+#             Warehouse = "${inventory_obj.Warehouse.WarehouseCompany_Name} System this side ," \
+#             " We need to place the order for the ${inventory_obj.ProductName} to you , The Product Quantity will be ${inventory_obj.ProductRestock}" \
+#             " We Hope you will reach us on this as soon as possible "
+#             Recipient_list =["${inventory_obj.SendersSide.Sender_Email}"]
+#             send_mail_warehouse(Subject,Warehouse,Recipient_list,settings.EMAIL_HOST_USER)
 
+#     except Exception as e:
+#         return JsonResponse({"message":"Invalid request"},status=400)
+
+@csrf_exempt
+def getBillDetails(request):
+   if request.method == "POST":
+      try:
+         print(request.body)
+         data = json.loads(request.body)
+
+
+         Warehouse_obj = Warehouse.objects.first()
+         Transporter_obj = Transporter.objects.first()
+         Driver_obj = Driver.objects.first()
+         Receiver_obj = ReceiverSide.objects.first()
+         invoice_obj = InvoiceBill.objects.create(
+            Invoice_number = data.get("Invoice_number",""),
+            Bill_validity = data.get("Bill_validity",""),
+            ValueOfGoods = int(data.get("ValueOfGoods","")),
+            ReasonForTransport = data.get("ReasonForTransport",""),
+            CEWBno = int(data.get("CEWBno","")),
+            MultiVehInfo = int(data.get("MultiVehInfo",""))
+         )
+
+         invoice_pdf = generate_invoice_pdf(invoice_obj.Invoice_number)
+         if invoice_pdf:
+            invoice_url = upload_to_cloudinary(invoice_pdf)
+            print(invoice_url)
+            if invoice_url:
+               invoice_obj.Bill_pdf = invoice_url
+               invoice_obj.save()
+         if not invoice_obj:
+            return JsonResponse({"message":"Fail Fail Fail"},status=404)
+         message = """Dear {receiver_name},
+
+We have generated the Invoice Bill of our transaction. We want you to review the details, and we will begin processing your order shortly.
+
+You will receive further updates as we proceed. If you have any questions, feel free to reach out to us.
+
+Thank you for choosing our services.
+
+Best Regards,  
+{Warehouse_Name} Team  
+📞 Contact: 98997975743  
+📧 Email: supportTotal@gmail.com 
+"""
+         send_email_with_pdf(
+            "Invoice Bill",
+            message.format(                 
+                  receiver_name=Receiver_obj.ReceiverCompany_Name,  
+                  Warehouse_Name=Warehouse_obj.WarehouseCompany_Name),
+              f"{Receiver_obj.Receiver_Email,Warehouse_obj.WarehouseEmail,Transporter_obj.Transporter_Email,Driver_obj.Driver_Email}", 
+              invoice_pdf
+            )
+         return JsonResponse({"message":"Data fetched Successfully"},status=200)
+      
+      except AssertionError as e:
+        logger.error(f"AssertionError occurred: {e}")
+   else:
+      return JsonResponse({"message":"Method Incorrect"},status=500)
+   
+
+
+def upload_to_cloudinary(file_path):
+    try:
+        response = upload(file_path, resource_type="raw")
+        return response.get("url")  # Get the URL of the uploaded file
     except Exception as e:
-        return JsonResponse({"message":"Invalid request"},status=400)
+        print(f"Error uploading to Cloudinary: {e}")
+        return None

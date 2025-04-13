@@ -6,7 +6,7 @@ from .models import Transporter , Driver ,Driver_Location
 # Create your views here.
 
 @csrf_exempt
-def TransporterSet(request):
+def getDetails(request):
     if request.method =="POST":
         try:
             print(request.body)
@@ -20,33 +20,43 @@ def TransporterSet(request):
                 Transporter_Contact = data.get("TransporterContact"),
                 Transporter_Email = data.get("TransporterEmail")
             )
-
-            return JsonResponse({"message":"Saved Successfully"},status=200)
-        except Exception as e :
-            return JsonResponse({"message":"Not a valid Request"},status=400)
-    
-    return JsonResponse({"Invalid Error"},status=400)
-
-
-@csrf_exempt
-def Driverget(request):
-    if request.method == "POST":
-        try:
-            print(request.body)
-            data = json.loads(request.body)
-            # if not request.user.is_authenticated:
-            #   return JsonResponse({"message":"User not authenticated"},status=401)
- 
             Drivers_obj = Driver.objects.create(
                 Driver_Name = data.get("DriverName"),
                 Vehicle_Number = data.get("Vehicle_Number"),
                 Driver_Contact = data.get("DriverContact"),
                 Driver_Email = data.get("DriverEmail")
             )
+
             return JsonResponse({"message":"Saved Successfully"},status=200)
-        except Exception as e:
-            return JsonResponse({"message":"Invalid request"},status=400)
-    return JsonResponse({"message":"Invalid request"},status=400)
+        except Exception as e :
+          import traceback
+          traceback.print_exc()  
+          return JsonResponse({"error": str(e)}, status=400)
+        except:
+            return JsonResponse({"message":"Not a valid Request"},status=400)
+    
+    return JsonResponse({"Invalid Error"},status=400)
+
+
+# @csrf_exempt
+# def Driverget(request):
+#     if request.method == "POST":
+#         try:
+#             print(request.body)
+#             data = json.loads(request.body)
+#             # if not request.user.is_authenticated:
+#             #   return JsonResponse({"message":"User not authenticated"},status=401)
+ 
+#             Drivers_obj = Driver.objects.create(
+#                 Driver_Name = data.get("DriverName"),
+#                 Vehicle_Number = data.get("Vehicle_Number"),
+#                 Driver_Contact = data.get("DriverContact"),
+#                 Driver_Email = data.get("DriverEmail")
+#             )
+#             return JsonResponse({"message":"Saved Successfully"},status=200)
+#         except Exception as e:
+#             return JsonResponse({"message":"Invalid request"},status=400)
+#     return JsonResponse({"message":"Invalid request"},status=400)
             
 
 @csrf_exempt

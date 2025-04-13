@@ -4,10 +4,14 @@ from registration.models import Warehouse
 from outbound.models import ReceiverSide
 from inbound.models import SendersSide
 
-def send_mail_warehouse():
-    subject = ""
-    message =""
-    from_email = settings.HOST_USER_NAME
-    recipients = []
+from django.core.mail import EmailMessage
 
-    send_mail(subject,message,from_email,recipients)
+def send_email_with_pdf(subject, body, recipient_email, pdf_path):
+    email = EmailMessage(
+        subject=subject,
+        body=body,
+        from_email=settings.EMAIL_HOST_USER,  
+        to=[recipient_email],            
+    )
+    email.attach_file(pdf_path)
+    email.send()

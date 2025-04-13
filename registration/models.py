@@ -3,7 +3,9 @@ import uuid
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from datetime import timedelta
+from cloudinary.models import CloudinaryField
 from django.utils import timezone
+from django.db.models import URLField
 # Create your models here.
 class Warehouse(models.Model):
     WarehouseCompany_Name = models.CharField(max_length=200,null=False,blank=False)
@@ -15,8 +17,8 @@ class Warehouse(models.Model):
     WarehouseContact = models.CharField(max_length=30)
     WarehouseEmail = models.EmailField(max_length=100)
     WarehouseType = models.CharField(max_length=100)
-    WarehouseCapacity = models.IntegerField()
-    WarehouseAvailable = models.BooleanField(default=True)
+    document = URLField(null=True,blank=True)
+
 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):

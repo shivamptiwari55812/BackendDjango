@@ -14,6 +14,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 load_dotenv() 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -158,3 +163,11 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
   # Use an App Password
 EMAIL_USE_SSL = False
 
+CLOUDINARY = {
+    'CLOUDINARY_CLOUD_NAME': os.getenv("CLOUDINARY_CLOUD_NAME"),
+    'CLOUDINARY_API_KEY': os.getenv("CLOUDINARY_API_KEY"),
+    'CLOUDINARY_API_SECRET': os.getenv("CLOUDINARY_API_SECRET"),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'
