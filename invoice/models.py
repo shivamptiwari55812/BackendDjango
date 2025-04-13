@@ -10,9 +10,9 @@ from django.utils.timezone import now
 # Create your models here.
 class InvoiceBill(models.Model):
     
-    Invoice_number = models.CharField(max_length=100,null=False,blank=False)
+    Invoice_number = models.CharField(max_length=100,null=False,blank=False,unique=True)
     Bill_date = models.DateField(auto_now_add=True)
-    Bill_number = models.CharField(max_length=20,null=True,blank=True)
+    Bill_number = models.CharField(max_length=20,null=True,blank=True,unique=True)
     Bill_time = models.DateTimeField(auto_now=True)
     Bill_validity = models.DateField()
     ValueOfGoods = models.IntegerField(default=0)
@@ -22,6 +22,8 @@ class InvoiceBill(models.Model):
     Bill_pdf = URLField(null=True,blank=True)
 
     # Relationships
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
+
     Receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE,null=True,blank=True)
     Sender = models.ForeignKey(SendersSide, on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):

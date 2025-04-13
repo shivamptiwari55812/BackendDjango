@@ -13,6 +13,7 @@ from invoice.models import InvoiceBill
 from registration.views import generate_and_store_otp
 from registration.models import OTP
 import random
+from .jwt_utils import generate_jwt
 
 
 
@@ -165,8 +166,9 @@ def verify_login_otp(request):
                   if user is not None:
                       otp_obj = OTP.objects.filter(user=user).latest('created_at')
                       if otp_obj.code == otp and not otp_obj.is_expired():
-                          login(request, user)
-                          return JsonResponse({"message": "Verification login successful"}, status=200)
+                          token = generate_jwt(user.id)
+                          print(token)
+                          return JsonResponse({"message": "Verification login successful","token":token,"username":user.username}, status=200)
                       else:
                           return JsonResponse({"message": "Invalid or expired OTP"}, status=400)
                   else:

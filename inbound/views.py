@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 from registration.models import Warehouse
 from django.conf import settings
+from warehouseminiBack.jwt_utils import decode_jwt
+from app1.decorators import jwt_required
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -17,9 +19,13 @@ def recordInbound(request):
 
 
 @csrf_exempt
+@jwt_required
 def orderForm(request):
     if request.method == "POST":
         try:
+            user=request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
             data = json.loads(request.body)
             print(data)
             
@@ -28,7 +34,7 @@ def orderForm(request):
             if not all(field in data for field in required_fields):  # Check presence
                 return JsonResponse({"error": "Missing required fields"}, status=400)
             
-            warehouse_obj = Warehouse.objects.all()
+            warehouse_obj = Warehouse.objects.filter(user=user).first() 
             sender_obj = SendersSide.objects.create(
                 SenderCompany_Name = data.get("SenderCompany_Name",""),
                 Sender_Address = data.get("SenderCompany_Address",""),
@@ -36,6 +42,7 @@ def orderForm(request):
                 Sender_Email = data.get("SenderCompany_Email",""),
                 ProductName = data.get("productName",""),
                 ProductQuantity = int(data.get("productQuantity","")),
+                user=user
                 # Expected_Date = data.get("Expected_Date"),
             )
 
@@ -76,4 +83,4 @@ Best Regards,
         except Exception as e:
             return JsonResponse({"message":"Invalid request"},status=400)   
     else:
-     return JsonResponse({"message":"Invalid request"},status=400)
+     return JsonResponse({"message":"Invalid request"},status=405)

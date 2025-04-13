@@ -10,24 +10,24 @@ from invoice.models import InvoiceBill
 from transport.models import Transporter,Driver
 from invoice.views import generate_invoice_pdf
 import json
-
+from app1.decorators import jwt_required
 import logging
 logger = logging.getLogger(__name__)
 # Create your views here.
 @csrf_exempt
+@jwt_required
 def submit_form_receiver(request):
 
     if request.method =='POST':
 
         
         try:
+
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
             print(request.body)
             data = json.loads(request.body)
-
-            # if not request.user.is_authenticated:
-            #  return JsonResponse({"message":"User not authenticated"},status=401)
-
-            
 
             Receiver_obj = ReceiverSide.objects.create(
                 ReceiverCompany_Name = data.get("ReceiverCompany_Name",""),
@@ -38,7 +38,7 @@ def submit_form_receiver(request):
                 Receiver_Contact=data.get("ReceiverCompany_Contact",""),
                 Receiver_Email =data.get("ReceiverCompany_Email",""),
                 ModeOfTransport = data.get("ModeOfTransport",""),
-                 
+                user=user
             )
             message = """Dear {receiver_name},
 

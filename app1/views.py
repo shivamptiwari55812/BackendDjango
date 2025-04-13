@@ -12,15 +12,22 @@ from inbound.models import SendersSide
 from outbound.models import ReceiverSide
 from .models import Inventory
 from django.contrib.auth.models import User
-
+from .decorators import jwt_required
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .utils.email_service import send_warehouse_email
 
 
 @csrf_exempt
+@jwt_required
 def add_item_inventory(request):
    if request.method =='POST':
      try:
+       user=request.user
+
+       if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+
        data = json.loads(request.body)
        print(data)
       #  if not request.user.is_authenticated:
@@ -32,10 +39,10 @@ def add_item_inventory(request):
          ProductCategory =data.get("productCategory",""),
          ProductQuantity = int(data.get("productQuantity",0)),
          ProductPrice =float(data.get("productPrice",0)),
-         Product_Rejected = int(data.get("productRejected",0)),
-         Transaction_type = data.get("TransactionType",""),
+         Product_Rejected = int(data.get("ProductRejected",0)),
+         Transaction_type = data.get("transactionType",""),
          ProductRestock = data.get("productRestock",0),
-         # Warehouse = Warehouse
+         user=user
        )
 
        return JsonResponse({"message":"Saved Successfully"},status=200)
@@ -43,19 +50,23 @@ def add_item_inventory(request):
       print("Error:", e)  
       return JsonResponse({"error": str(e)}, status=400)  
 
-   return JsonResponse({"message":"Invalid Response"},status =400)
+   return JsonResponse({"message":"Invalid Request"},status =401)
 
 @csrf_exempt
+@jwt_required
 def del_product_inventory(request):
     if request.method == 'DELETE':
         try:
+           
+           user = request.user
+           if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+
            data = json.loads(request.body)
            print(data)
-         #   if not request.user.is_authenticated:
-         #    return JsonResponse({"message":"User not authenticated"},status=401)
-
+        
            product_id= data.get("id")
-           product_obj = Inventory.objects.filter(id = product_id).first()
+           product_obj = Inventory.objects.filter(id = product_id,user=user).first()
 
            if not product_obj:
             return JsonResponse({"message":"Product not found"},status=404)   
@@ -66,18 +77,23 @@ def del_product_inventory(request):
             return JsonResponse({"message":"Invalid request"},status=400)
                  
            
-    return JsonResponse({"message":"Invalid request"},status=400)
+    return JsonResponse({"message":"Invalid request"},status=405)
 
 @csrf_exempt
+@jwt_required
 def edit_product_inventory(request):
     if request.method == 'PUT':
        try:
+          
+          user= request.user
+          if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
           data = json.loads(request.body)
           print(data)
 
           product_id = request.GET.get('product_id')
 
-          product_obj = Inventory.objects.filter(id=product_id).first()
+          product_obj = Inventory.objects.filter(id=product_id,user=user).first()
 
           if not product_obj:
              return JsonResponse ({"message":"Product not found"},status =404)
@@ -93,28 +109,37 @@ def edit_product_inventory(request):
           return JsonResponse({"message":"Product updated successfully"},status=200)
        except Exception as e:
           return JsonResponse({"message":"Invalid request"},status=400)
-    return JsonResponse({"message":"Invalid request"},status=400)
+    return JsonResponse({"message":"Invalid request"},status=405)
 
 
 @csrf_exempt
+@jwt_required
 def get_product_details(request):
 
    if request.method == "GET":
       try:
-         products_obj = Inventory.objects.all()
+
+         user = request.user
+         if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+         products_obj = Inventory.objects.filter(user=user)
          product_list = list(products_obj.values())
          return JsonResponse({"message":"Data sent successfully","data":product_list},status=200)
       except Exception as e:
          return JsonResponse({"message":"Invalid request"},status=400)
    else:
-      return JsonResponse({"message":"Invalid request"},status=400)
+      return JsonResponse({"message":"Invalid request"},status=405)
 
-@csrf_exempt   
+@csrf_exempt
+@jwt_required  
 def get_product_foredit(request): 
+    user=request.user
+    if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
     product_id = request.GET.get("product_id")
     if not product_id:
        return JsonResponse({"error": "Product ID is required"}, status=400)
-    product = get_object_or_404(Inventory, id=product_id)  
+    product = get_object_or_404(Inventory, id=product_id,user=user)  
 
     return JsonResponse({
         "ProductName": product.ProductName,
@@ -136,9 +161,13 @@ def sent_notification(request):
 
 
 @csrf_exempt
+@jwt_required
 def totalItems(request):
  try:
    if request.method == "GET":
+      user=request.user
+      if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
       total_items = Inventory.objects.aggregate(total_items=Sum('ProductQuantity'))
       print(total_items)
       if total_items is None:

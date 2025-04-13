@@ -7,6 +7,7 @@ from django.http import JsonResponse,FileResponse
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import os
+from django.contrib.auth.models import User
 from .models import InvoiceBill
 from registration.models import Warehouse
 from app1.models import Inventory
@@ -17,26 +18,26 @@ from .utils.email_services import send_email_with_pdf
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 import logging
+from app1.decorators import jwt_required
 logger = logging.getLogger(__name__)
 # Create your views here.
 @csrf_exempt
-def generate_invoice_pdf(Invoice_number):
+@jwt_required
+def generate_invoice_pdf(user,Invoice_number):
     try:
-        # if not request.user.is_authenticated:
-        #   return JsonResponse({"message":"User not authenticated"},status=401)
-
-        invoice = InvoiceBill.objects.filter(Invoice_number=Invoice_number)
+        
+        invoice = InvoiceBill.objects.filter(Invoice_number=Invoice_number,user=user)
 
         if not invoice.exists():
             return JsonResponse({"message": "Invoice not found"}, status=404)
         invoice = invoice.first()
         try:
-         warehouse = Warehouse.objects.first()
+         warehouse = Warehouse.objects.filter(user=user).first()
         except Exception as e:  
             return JsonResponse({"message": "Warehouse not found"}, status=404)
-        receiver = ReceiverSide.objects.first()
-        transporter = Transporter.objects.first()
-        driver = Driver.objects.first()
+        receiver = ReceiverSide.objects.filter(user=user).first()
+        transporter = Transporter.objects.filter(user=user).first()
+        driver = Driver.objects.filter(user=user).first()
     except InvoiceBill.DoesNotExist:
         return JsonResponse({"message": "Invoice not found"}, status=404)
 
@@ -146,6 +147,7 @@ def generate_invoice_pdf(Invoice_number):
 #         return JsonResponse({"message":"Invalid request"},status=400)
 
 @csrf_exempt
+@jwt_required
 def getBillDetails(request):
    if request.method == "POST":
       try:

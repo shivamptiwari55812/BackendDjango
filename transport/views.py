@@ -2,29 +2,38 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+from django.contrib.auth.models import User
+from app1.decorators import jwt_required
 from .models import Transporter , Driver ,Driver_Location
 # Create your views here.
 
 @csrf_exempt
+@jwt_required
 def getDetails(request):
     if request.method =="POST":
         try:
+
+            user=request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
             print(request.body)
             data =json.loads(request.body)
             # if not request.user.is_authenticated:
             #  return JsonResponse({"message":"User not authenticated"},status=401)
 
             Transporter_obj = Transporter.objects.create(
-                TransporterName = data.get("TransporterName ",'None'),
+                TransporterName = data.get("TransporterName",'None'),
                 TransporterAddress = data.get("TransporterAddress"),
                 Transporter_Contact = data.get("TransporterContact"),
-                Transporter_Email = data.get("TransporterEmail")
+                Transporter_Email = data.get("TransporterEmail"),
+                user=user
             )
             Drivers_obj = Driver.objects.create(
                 Driver_Name = data.get("DriverName"),
                 Vehicle_Number = data.get("Vehicle_Number"),
                 Driver_Contact = data.get("DriverContact"),
-                Driver_Email = data.get("DriverEmail")
+                Driver_Email = data.get("DriverEmail"),
+                Transporter=Transporter_obj
             )
 
             return JsonResponse({"message":"Saved Successfully"},status=200)

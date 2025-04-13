@@ -12,7 +12,7 @@ class ReceiverSide(models.Model):
     Receiver_Email = models.EmailField(max_length=100)
     ModeOfTransport = models.CharField(max_length=100,blank=True,null=True,default = 'By Road')  
 
-    Warehouse = models.ForeignKey('registration.Warehouse', on_delete=models.CASCADE,null=True,blank=True)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return self.ReceiverCompany_Name
     

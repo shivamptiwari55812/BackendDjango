@@ -5,22 +5,24 @@ import json
 import random
 from django.contrib.auth.models import User
 import cloudinary
+from app1.decorators import jwt_required
 from .models import Warehouse,OTP
 # Create your views here.
 
 
 @csrf_exempt
+@jwt_required
 def warehouseSet(request):
     
     if request.method == 'POST':
         print("request received")
         try:
+
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
             print(request.body)
             
-
-            # if not request.user.is_authenticated:
-            #  return JsonResponse({"message":"User not authenticated"},status=401)
-
             warehouse_name = request.POST.get("warehouseName")
             warehouse_address = request.POST.get("warehouseAddress")
             warehouse_city = request.POST.get("warehouseCity")
@@ -46,6 +48,7 @@ def warehouseSet(request):
                 WarehouseEmail=warehouse_email,
                 WarehouseType=warehouse_type,
                 document=document_url,
+                user=user
             )
 
             return JsonResponse({"message":"Data saved Successfully"},status=200)

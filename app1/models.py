@@ -23,7 +23,7 @@ class Inventory(models.Model):
     ProductRestock = models.IntegerField(null=True, blank=True)
     
     
-    Warehouse = models.ForeignKey('registration.Warehouse', on_delete=models.CASCADE,null=True,blank=True)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
     def save(self, *args, **kwargs): 
         if self.ProductQuantity > 70:
             self.status = "InStock"

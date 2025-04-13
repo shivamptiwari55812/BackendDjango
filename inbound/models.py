@@ -16,8 +16,8 @@ class SendersSide(models.Model):
     Expected_Date = models.DateTimeField(blank=True,null=True) 
 
     # Relationship
-    Warehouse = models.ForeignKey('registration.Warehouse', on_delete=models.CASCADE,null=True,blank=True)
-    
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
+
     def __str__(self):
         return self.SenderCompany_Name
     
