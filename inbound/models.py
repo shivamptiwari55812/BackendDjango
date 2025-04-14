@@ -8,7 +8,7 @@ from django.utils import timezone
 # Create your models here.
 class SendersSide(models.Model):
     SenderCompany_Name = models.CharField(max_length=100)
-    Sender_Address = models.CharField(max_length=200)
+    Sender_Address = models.CharField(max_length=500)
     Sender_City = models.CharField(max_length=30)
     Sender_Email = models.EmailField(max_length=100)
     ProductName = models.CharField(max_length=100,null=True,blank=True)

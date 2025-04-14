@@ -11,6 +11,8 @@ from django.conf import settings
 from warehouseminiBack.jwt_utils import decode_jwt
 from app1.decorators import jwt_required
 logger = logging.getLogger(__name__)
+from django.utils import timezone
+from datetime import datetime
 
 # Create your views here.
 def recordInbound(request):
@@ -29,11 +31,9 @@ def orderForm(request):
             data = json.loads(request.body)
             print(data)
             
-            # Check for missing required fields BEFORE creating the object
-            required_fields = ["SenderCompany_Name", "SenderCompany_Address", "SenderCompany_City", "SenderCompany_Email","productQuantity"]  # Include the fields you consider required
-            if not all(field in data for field in required_fields):  # Check presence
-                return JsonResponse({"error": "Missing required fields"}, status=400)
-            
+            expected_date_str = data.get("Expected_date")
+            expected_date_obj = timezone.make_aware(datetime.strptime(expected_date_str, "%Y-%m-%d")) if expected_date_str else None
+           
             warehouse_obj = Warehouse.objects.filter(user=user).first() 
             sender_obj = SendersSide.objects.create(
                 SenderCompany_Name = data.get("SenderCompany_Name",""),
@@ -42,7 +42,7 @@ def orderForm(request):
                 Sender_Email = data.get("SenderCompany_Email",""),
                 ProductName = data.get("productName",""),
                 ProductQuantity = int(data.get("productQuantity","")),
-                Expected_Date = data.get("Expected_Date"),
+                Expected_Date = expected_date_obj,
                 user=user
                 
             )
@@ -62,7 +62,7 @@ Best Regards,
             send_mail(
                 "Order Received /Confirmation Mail",
                 message.format(
-                    receiver_name=sender_obj.SenderCompany_Name, 
+                    SenderCompany_Name=sender_obj.SenderCompany_Name, 
                     Warehouse_name =warehouse_obj.WarehouseCompany_Name, 
                     Warehouse_Email =warehouse_obj.WarehouseEmail,
                     ProductName =sender_obj.ProductName,
@@ -73,15 +73,14 @@ Best Regards,
 
             )
 
-            if not all(sender_obj):
-                return JsonResponse({"error": "Missing required fields"}, status=400)
-
             return JsonResponse({"message":"Data saved Successfully"},status=200)
         except json.JSONDecodeError as e:
             # Log the error
             logger.error(f"JSONDecodeError: {e}")
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
+            print(f"Unexpected error: {e}") 
             return JsonResponse({"message":"Invalid request"},status=400)   
     else:
      return JsonResponse({"message":"Invalid request"},status=405)
+    

@@ -6,4 +6,5 @@ from .import views
 
 urlpatterns = [
     path('warehouse',views.warehouseSet,name="warehouseSet"),
+    path('getDetails',views.getDetails,name="getDetails"),
     ]

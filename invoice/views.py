@@ -223,3 +223,20 @@ def upload_to_cloudinary(file_path):
     except Exception as e:
         print(f"Error uploading to Cloudinary: {e}")
         return None
+
+
+@csrf_exempt
+@jwt_required
+def get_Details(request):
+   if request.method=="GET":
+      try:
+         user=request.user
+         if not user.is_authenticated:
+            return JsonResponse({"message":"User not authenticated"},status=401)
+         invoice_obj = InvoiceBill.objects.filter(user=user).order_by("-id")
+         invoice_list = list(invoice_obj.values())
+         return JsonResponse({"message":"Data sent successfully","data":invoice_list},status=200)
+      except Exception as e:
+         return JsonResponse({"message":"Error occurred","error":str(e)},status=400)
+   else:
+       return JsonResponse({"message":"Invalid request"},status=405)

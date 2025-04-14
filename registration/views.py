@@ -68,3 +68,27 @@ def generate_and_store_otp(user):
     otp_instance =OTP.objects.create(user=user,code=str(otp_code))
 
     return otp_code
+
+from django.forms.models import model_to_dict
+
+@csrf_exempt
+@jwt_required
+def getDetails(request):
+    if request.method == "GET":
+        try:
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+            
+            warehouse_obj = Warehouse.objects.filter(user=user).first()
+            if not warehouse_obj:
+                return JsonResponse({"message": "Warehouse not found"}, status=404)
+            
+            # Convert the model instance to a dictionary
+            warehouse_data = model_to_dict(warehouse_obj)
+            
+            return JsonResponse({"message": "Data sent successfully", "data": warehouse_data}, status=200)
+        except Exception as e:
+            return JsonResponse({"message": "Error occurred", "error": str(e)}, status=400)
+    else:
+        return JsonResponse({"message": "Invalid request"}, status=405)
