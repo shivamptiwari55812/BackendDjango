@@ -13,6 +13,8 @@ from invoice.models import InvoiceBill
 from registration.views import generate_and_store_otp
 from registration.models import OTP
 import random
+from .jwt_utils import decode_jwt
+from app1.decorators import jwt_required
 from .jwt_utils import generate_jwt
 
 
@@ -113,7 +115,8 @@ def loginView(request):
         return JsonResponse({"message": "Invalid request method"}, status=405)
         
 
-
+@csrf_exempt
+@jwt_required
 def logoutView(request):
  if request.method == "POST":
     logout()
@@ -123,6 +126,7 @@ def logoutView(request):
 
 
 @csrf_exempt
+
 def verify_otp(request):
     if request.method == "POST":
         try:
@@ -139,6 +143,8 @@ def verify_otp(request):
                 if otp_instance.code == otp and not otp_instance.is_expired():
                     user.is_active = True  # Activate user
                     user.save()
+                    token = generate_jwt(user.id)
+                    print(token)
                     return JsonResponse({"message": "Verification successful"}, status=200)
                 
                 return JsonResponse({"message": "Invalid or expired OTP"}, status=400)

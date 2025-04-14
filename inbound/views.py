@@ -42,8 +42,9 @@ def orderForm(request):
                 Sender_Email = data.get("SenderCompany_Email",""),
                 ProductName = data.get("productName",""),
                 ProductQuantity = int(data.get("productQuantity","")),
+                Expected_Date = data.get("Expected_Date"),
                 user=user
-                # Expected_Date = data.get("Expected_Date"),
+                
             )
 
             message = """Dear {SenderCompany_Name},
@@ -64,8 +65,8 @@ Best Regards,
                     receiver_name=sender_obj.SenderCompany_Name, 
                     Warehouse_name =warehouse_obj.WarehouseCompany_Name, 
                     Warehouse_Email =warehouse_obj.WarehouseEmail,
-                    ProductName =sender_obj.productName,
-                    ProductQuantity =sender_obj.productQuantity
+                    ProductName =sender_obj.ProductName,
+                    ProductQuantity =sender_obj.ProductQuantity
                 ),
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[data.get("SenderCompany_Email","")]

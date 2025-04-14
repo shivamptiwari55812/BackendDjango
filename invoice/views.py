@@ -21,8 +21,7 @@ import logging
 from app1.decorators import jwt_required
 logger = logging.getLogger(__name__)
 # Create your views here.
-@csrf_exempt
-@jwt_required
+
 def generate_invoice_pdf(user,Invoice_number):
     try:
         
@@ -37,7 +36,7 @@ def generate_invoice_pdf(user,Invoice_number):
             return JsonResponse({"message": "Warehouse not found"}, status=404)
         receiver = ReceiverSide.objects.filter(user=user).first()
         transporter = Transporter.objects.filter(user=user).first()
-        driver = Driver.objects.filter(user=user).first()
+        driver = Driver.objects.filter(Transporter__user=user).first()
     except InvoiceBill.DoesNotExist:
         return JsonResponse({"message": "Invoice not found"}, status=404)
 
@@ -151,24 +150,29 @@ def generate_invoice_pdf(user,Invoice_number):
 def getBillDetails(request):
    if request.method == "POST":
       try:
+         user=request.user
+
+         if not user.is_authenticated:
+            return JsonResponse({"message": "User not authenticated"}, status=401)
          print(request.body)
          data = json.loads(request.body)
 
 
-         Warehouse_obj = Warehouse.objects.first()
-         Transporter_obj = Transporter.objects.first()
-         Driver_obj = Driver.objects.first()
-         Receiver_obj = ReceiverSide.objects.first()
+         Warehouse_obj = Warehouse.objects.filter(user=user).first()
+         Transporter_obj = Transporter.objects.filter(user=user).first()
+         Driver_obj = Driver.objects.filter(Transporter__user=user).first()
+         Receiver_obj = ReceiverSide.objects.filter(user=user).first()
          invoice_obj = InvoiceBill.objects.create(
             Invoice_number = data.get("Invoice_number",""),
             Bill_validity = data.get("Bill_validity",""),
             ValueOfGoods = int(data.get("ValueOfGoods","")),
             ReasonForTransport = data.get("ReasonForTransport",""),
             CEWBno = int(data.get("CEWBno","")),
-            MultiVehInfo = int(data.get("MultiVehInfo",""))
+            MultiVehInfo = int(data.get("MultiVehInfo","")),
+            user=user
          )
 
-         invoice_pdf = generate_invoice_pdf(invoice_obj.Invoice_number)
+         invoice_pdf = generate_invoice_pdf(request.user,invoice_obj.Invoice_number)
          if invoice_pdf:
             invoice_url = upload_to_cloudinary(invoice_pdf)
             print(invoice_url)
@@ -195,7 +199,12 @@ Best Regards,
             message.format(                 
                   receiver_name=Receiver_obj.ReceiverCompany_Name,  
                   Warehouse_Name=Warehouse_obj.WarehouseCompany_Name),
-              f"{Receiver_obj.Receiver_Email,Warehouse_obj.WarehouseEmail,Transporter_obj.Transporter_Email,Driver_obj.Driver_Email}", 
+                   [
+        Receiver_obj.Receiver_Email,
+        Warehouse_obj.WarehouseEmail,
+        Transporter_obj.Transporter_Email,
+        Driver_obj.Driver_Email
+    ],
               invoice_pdf
             )
          return JsonResponse({"message":"Data fetched Successfully"},status=200)
