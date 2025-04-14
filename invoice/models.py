@@ -24,7 +24,7 @@ class InvoiceBill(models.Model):
     # Relationships
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
 
-    Receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE,null=True,blank=True)
+    receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE, null=True, blank=True)
     Sender = models.ForeignKey(SendersSide, on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return f"Invoice {self.Invoice_number} - {self.Bill_number}"

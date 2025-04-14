@@ -9,7 +9,7 @@ class ReceiverSide(models.Model):
     Receiver_GSTIN = models.CharField(max_length=100)
     Receiver_State = models.CharField(max_length=100)
     Receiver_Contact = models.CharField(max_length=30)
-    Receiver_Email = models.EmailField(max_length=100)
+    Receiver_Email = models.EmailField(max_length=100,primary_key=True)
     ModeOfTransport = models.CharField(max_length=100,blank=True,null=True,default = 'By Road')  
 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)

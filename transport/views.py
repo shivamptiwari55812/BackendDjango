@@ -4,6 +4,9 @@ from django.http import JsonResponse
 import json
 from django.contrib.auth.models import User
 from app1.decorators import jwt_required
+from django.conf import settings
+from outbound.utils.email_service import send_mail
+from outbound.models import ReceiverSide
 from .models import Transporter , Driver ,Driver_Location
 # Create your views here.
 
@@ -12,21 +15,33 @@ from .models import Transporter , Driver ,Driver_Location
 def getDetails(request):
     if request.method =="POST":
         try:
-
+              
             user=request.user
             if not user.is_authenticated:
                 return JsonResponse({"message": "User not authenticated"}, status=401)
             print(request.body)
             data =json.loads(request.body)
-            # if not request.user.is_authenticated:
-            #  return JsonResponse({"message":"User not authenticated"},status=401)
+            Receiver_Email=data.get("Receiver_Email")
+            
 
+            if not Receiver_Email:
+                return JsonResponse({"error": "Receiver email not provided"}, status=400)
+
+            # Try to get the receiver by email and user
+            try:
+                receiver = ReceiverSide.objects.get(Receiver_Email=Receiver_Email, user=user)
+            except ReceiverSide.DoesNotExist:
+                return JsonResponse({"error": "Receiver not found"}, status=404)
+
+           
             Transporter_obj = Transporter.objects.create(
                 TransporterName = data.get("TransporterName",'None'),
                 TransporterAddress = data.get("TransporterAddress"),
                 Transporter_Contact = data.get("TransporterContact"),
                 Transporter_Email = data.get("TransporterEmail"),
-                user=user
+                user=user,
+                receiver=receiver
+
             )
             Drivers_obj = Driver.objects.create(
                 Driver_Name = data.get("DriverName"),
@@ -70,6 +85,7 @@ def getDetails(request):
 
 @csrf_exempt
 def saveLocation(request):
+
     if request.method == 'POST':
      try:
          data = json.loads(request.body)
@@ -86,3 +102,24 @@ def saveLocation(request):
          return JsonResponse({"message":"Invalid "})
     else:
         return JsonResponse({"Invalid request"})
+    
+
+@csrf_exempt
+def send_email_to_driver(Driver_Email, token):
+    # Construct the email content
+    warehouse_obj = Warehouse.objects.filter(user=user).first();
+    subject = "Delivery Verification"
+    from_email = WarehouseEmail or settings.EMAIL_HOST_USER
+    recipient_list = [Driver_Email]
+    link = f"{settings.FRONTEND_URL}/delivery-verification/{token}"
+
+    message = f"""
+    <html>
+        <body>
+            <h2>Delivery Verification</h2>
+            <p>Click the link below to proceed with the OTP verification:</p>
+            <a href="{link}">Verify Delivery</a>
+        </body>
+    </html>
+    """
+    send_mail(subject, message, from_email, recipient_list, html_message=message)

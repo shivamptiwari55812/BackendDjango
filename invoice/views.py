@@ -130,21 +130,6 @@ def generate_invoice_pdf(user,Invoice_number):
 
 
 
-# @csrf_exempt
-# def automate_email(request):
-#     inventory_obj = Inventory.objects.all()
-#     try:
-#         if( inventory_obj.status== 'OutofStock'):
-#             Subject= "Automated mail to place order for the ${inventory_obj.ProductName}"
-#             Warehouse = "${inventory_obj.Warehouse.WarehouseCompany_Name} System this side ," \
-#             " We need to place the order for the ${inventory_obj.ProductName} to you , The Product Quantity will be ${inventory_obj.ProductRestock}" \
-#             " We Hope you will reach us on this as soon as possible "
-#             Recipient_list =["${inventory_obj.SendersSide.Sender_Email}"]
-#             send_mail_warehouse(Subject,Warehouse,Recipient_list,settings.EMAIL_HOST_USER)
-
-#     except Exception as e:
-#         return JsonResponse({"message":"Invalid request"},status=400)
-
 @csrf_exempt
 @jwt_required
 def getBillDetails(request):
@@ -154,14 +139,28 @@ def getBillDetails(request):
 
          if not user.is_authenticated:
             return JsonResponse({"message": "User not authenticated"}, status=401)
-         print(request.body)
+         print("Res",request.body)
          data = json.loads(request.body)
 
+         Receiver_Email=data.get("Receiver_Email")
+         if not Receiver_Email:
+            return JsonResponse({"error": "Receiver email not provided"}, status=400)
 
+         print("Shivam")
+         try:
+            receiver = ReceiverSide.objects.get(Receiver_Email=Receiver_Email, user=user)
+         except ReceiverSide.DoesNotExist as e:
+            logger.exception(f"Receiver not found for email: {Receiver_Email} and user: {user}. Error: {e}")
+            return JsonResponse({"error": "Receiver not found"}, status=404)
+         print("Shivam1 ")
          Warehouse_obj = Warehouse.objects.filter(user=user).first()
          Transporter_obj = Transporter.objects.filter(user=user).first()
          Driver_obj = Driver.objects.filter(Transporter__user=user).first()
-         Receiver_obj = ReceiverSide.objects.filter(user=user).first()
+
+         if not Warehouse_obj or not Transporter_obj or not Driver_obj:
+            logger.error("Required associated objects (Warehouse, Transporter, Driver) not found")
+            return JsonResponse({"error": "Required associated objects not found"}, status=404)
+
          invoice_obj = InvoiceBill.objects.create(
             Invoice_number = data.get("Invoice_number",""),
             Bill_validity = data.get("Bill_validity",""),
@@ -169,19 +168,24 @@ def getBillDetails(request):
             ReasonForTransport = data.get("ReasonForTransport",""),
             CEWBno = int(data.get("CEWBno","")),
             MultiVehInfo = int(data.get("MultiVehInfo","")),
-            user=user
+            user=user,
+            receiver=receiver,
          )
-
-         invoice_pdf = generate_invoice_pdf(request.user,invoice_obj.Invoice_number)
-         if invoice_pdf:
+         try:
+          invoice_pdf = generate_invoice_pdf(request.user,invoice_obj.Invoice_number)
+          if invoice_pdf:
             invoice_url = upload_to_cloudinary(invoice_pdf)
             print(invoice_url)
             if invoice_url:
                invoice_obj.Bill_pdf = invoice_url
                invoice_obj.save()
-         if not invoice_obj:
-            return JsonResponse({"message":"Fail Fail Fail"},status=404)
+          else:
+               logger.error("Invoice PDF generation failed")
+               return JsonResponse({"message": "Invoice PDF generation failed"}, status=500)
+         except AssertionError as e:
+          logger.error(f"AssertionError occurred: {e}")
          message = """Dear {receiver_name},
+         
 
 We have generated the Invoice Bill of our transaction. We want you to review the details, and we will begin processing your order shortly.
 
@@ -197,10 +201,10 @@ Best Regards,
          send_email_with_pdf(
             "Invoice Bill",
             message.format(                 
-                  receiver_name=Receiver_obj.ReceiverCompany_Name,  
+                  receiver_name=receiver.ReceiverCompany_Name,  
                   Warehouse_Name=Warehouse_obj.WarehouseCompany_Name),
                    [
-        Receiver_obj.Receiver_Email,
+        receiver.Receiver_Email,
         Warehouse_obj.WarehouseEmail,
         Transporter_obj.Transporter_Email,
         Driver_obj.Driver_Email

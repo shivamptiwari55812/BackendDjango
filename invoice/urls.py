@@ -6,5 +6,6 @@ from .import views
 
 urlpatterns = [
     path('pdf/<str:Invoice_number>/',views.generate_invoice_pdf,name='generate_invoice_pdf'),
-    path("getDetails",views.get_Details,name="get_Details")
+    path("getDetails",views.get_Details,name="get_Details"),
+    path("getBillDetails",views.getBillDetails,name="get_BillDetails")
 ]

@@ -1,5 +1,6 @@
 from django.db import models
 from registration.models import Warehouse
+from outbound.models import ReceiverSide
 
 class Transporter(models.Model):
     TransporterName = models.CharField(max_length=100,null=True,blank=True)
@@ -8,6 +9,7 @@ class Transporter(models.Model):
     Transporter_Email = models.EmailField(max_length=100,null=True,blank=True)
 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE,null=True,blank=True)
+    receiver = models.ForeignKey(ReceiverSide, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
         return self.TransporterName  if self.TransporterName else "Unnamed Transporter"
 
@@ -34,3 +36,5 @@ class Driver_Location(models.Model):
 
     def __str__(self):
         return str(self.Driver);
+
+
