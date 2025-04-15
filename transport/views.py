@@ -8,7 +8,7 @@ from django.conf import settings
 from outbound.utils.email_service import send_mail
 from outbound.models import ReceiverSide
 from .models import Transporter , Driver ,Driver_Location
-# Create your views here.
+
 
 @csrf_exempt
 @jwt_required
@@ -104,22 +104,23 @@ def saveLocation(request):
         return JsonResponse({"Invalid request"})
     
 
-@csrf_exempt
-def send_email_to_driver(Driver_Email, token):
-    # Construct the email content
-    warehouse_obj = Warehouse.objects.filter(user=user).first();
-    subject = "Delivery Verification"
-    from_email = WarehouseEmail or settings.EMAIL_HOST_USER
-    recipient_list = [Driver_Email]
-    link = f"{settings.FRONTEND_URL}/delivery-verification/{token}"
 
-    message = f"""
-    <html>
-        <body>
-            <h2>Delivery Verification</h2>
-            <p>Click the link below to proceed with the OTP verification:</p>
-            <a href="{link}">Verify Delivery</a>
-        </body>
-    </html>
-    """
-    send_mail(subject, message, from_email, recipient_list, html_message=message)
+# @csrf_exempt
+# def send_email_to_driver(Driver_Email, token):
+#     # Construct the email content
+#     warehouse_obj = Warehouse.objects.filter(user=user).first();
+#     subject = "Delivery Verification"
+#     from_email = WarehouseEmail or settings.EMAIL_HOST_USER
+#     recipient_list = [Driver_Email]
+#     link = f"{settings.FRONTEND_URL}/delivery-verification/{token}"
+
+#     message = f"""
+#     <html>
+#         <body>
+#             <h2>Delivery Verification</h2>
+#             <p>Click the link below to proceed with the OTP verification:</p>
+#             <a href="{link}">Verify Delivery</a>
+#         </body>
+#     </html>
+#     """
+#     send_mail(subject, message, from_email, recipient_list, html_message=message)

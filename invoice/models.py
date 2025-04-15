@@ -14,7 +14,7 @@ class InvoiceBill(models.Model):
     Bill_date = models.DateField(auto_now_add=True)
     Bill_number = models.CharField(max_length=20,null=True,blank=True,unique=True)
     Bill_time = models.DateTimeField(auto_now=True)
-    Bill_validity = models.DateField()
+    Bill_validity = models.DateTimeField()
     ValueOfGoods = models.IntegerField(default=0)
     ReasonForTransport = models.TextField()
     CEWBno = models.IntegerField()

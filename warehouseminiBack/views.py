@@ -145,7 +145,7 @@ def verify_otp(request):
                     user.save()
                     token = generate_jwt(user.id)
                     print(token)
-                    return JsonResponse({"message": "Verification successful"}, status=200)
+                    return JsonResponse({"message": "Verification successful","token":token}, status=200)
                 
                 return JsonResponse({"message": "Invalid or expired OTP"}, status=400)
             

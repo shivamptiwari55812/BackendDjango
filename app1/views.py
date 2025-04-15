@@ -168,12 +168,61 @@ def totalItems(request):
       user=request.user
       if not user.is_authenticated:
                 return JsonResponse({"message": "User not authenticated"}, status=401)
-      total_items = Inventory.objects.aggregate(total_items=Sum('ProductQuantity'))
+      total_items = Inventory.objects.filter(user=user).aggregate(total_items=Sum('ProductQuantity'))
       print(total_items)
       if total_items is None:
          return JsonResponse({"total_items": 0}, status=200)
       else:
          return JsonResponse({"total_items": total_items}, status=200)   
+   else:
+      return JsonResponse({"error": "Invalid request"}, status=400)
+ except Exception as e:
+    return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+ 
+
+
+
+@csrf_exempt
+@jwt_required
+def totalOrders(request):
+ try:
+   if request.method == "GET":
+      user=request.user
+      if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+      total_orders1 = SendersSide.objects.filter(user=user).count()
+      total_orders2 = ReceiverSide.objects.filter(user=user).count()
+
+      total_orders = total_orders1 + total_orders2
+      print(total_orders)
+      if total_orders is None:
+         return JsonResponse({"total_orders": 0}, status=200)
+      else:
+         return JsonResponse({"total_orders": total_orders}, status=200)   
+   else:
+      return JsonResponse({"error": "Invalid request"}, status=400)
+ except Exception as e:
+    return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+ 
+
+
+
+
+@csrf_exempt
+@jwt_required
+def totalShipments(request):
+ try:
+   if request.method == "GET":
+      user=request.user
+      if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+      total_Shipments = InvoiceBill.objects.filter(user=user).count()
+
+      print(total_Shipments)
+      if total_Shipments is None:
+         return JsonResponse({"total_Shipments": 0}, status=200)
+      else:
+         return JsonResponse({"total_Shipments": total_Shipments}, status=200)   
    else:
       return JsonResponse({"error": "Invalid request"}, status=400)
  except Exception as e:

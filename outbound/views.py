@@ -7,6 +7,9 @@ from django.http import JsonResponse
 from django.conf import settings
 from .utils.email_service import send_mail,EmailMessage
 from invoice.models import InvoiceBill
+from .models import ReceiverSide
+from app1.models import Inventory
+from inbound.models import SendersSide
 from transport.models import Transporter,Driver
 from invoice.views import generate_invoice_pdf
 import json
@@ -75,17 +78,90 @@ WarehouseMini Team
 
 
 @csrf_exempt
+@jwt_required
 def getOrdersDetails(request):
     if request.method == "GET":
         try:
-            invoice_obj = InvoiceBill.objects.all()
-            receiver_obj = ReceiverSide.objects.all()
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({"message": "User not authenticated"}, status=401)
+            invoice_obj = InvoiceBill.objects.filter(user=user).all()
+            receiver_obj = ReceiverSide.objects.filter(user=user).all()
             receiver_list = list(receiver_obj.values())
             invoice_list = list(invoice_obj.values())
-            
+            print(invoice_list)
+            print(receiver_list)
             return JsonResponse({"message":"Data sent successfully","invoices":invoice_list,"receiver":receiver_list},status=200)
         except Exception as e:
             logger.error(f"An error occurred: {e}")
             return JsonResponse({"message": "An error occurred while processing the request"}, status=500)
     else:
+        return JsonResponse({"message":"Invalid request"},status=405)
+    
+
+from django.db.models import Sum
+
+@csrf_exempt  # if not using CSRF token
+@jwt_required
+def chart_data_view(request):
+    if request.method == "GET":
+       try: 
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse({"message": "User not authenticated"}, status=401)
+        total_senders = SendersSide.objects.filter(user=user).exclude(Sender_Email=None).count()
+        total_receivers = ReceiverSide.objects.filter(user=user).exclude(Receiver_Email=None).count()
+        total_orders = total_senders + total_receivers
+
+        total_products = Inventory.objects.filter(user=user).exclude(ProductName=None).count()
+
+        total_shipments = InvoiceBill.objects.filter(user=user).exclude(Bill_pdf=None).count()
+        total_quantity = Inventory.objects.filter(ProductQuantity__isnull=False,user=user).aggregate(
+          total=Sum('ProductQuantity')
+                )['total'] or 0
+
+        data = {
+            "total_orders": total_orders,
+            "total_products": total_products,
+            "total_shipments": total_shipments,
+            "total_quantity": total_quantity
+        }
+
+        return JsonResponse({"message":"Data sent successfully","data":data},status=200)
+       except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            return JsonResponse({"message": "An error occurred while processing the request"}, status=500)
+    else:
+        return JsonResponse({"message":"Invalid request"},status=405)
+    
+
+@csrf_exempt
+@jwt_required
+def piechart_view(request):
+     if request.method == "GET":
+       try: 
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse({"message": "User not authenticated"}, status=401)
+        total_senders = SendersSide.objects.filter(user=user).exclude(Sender_Email=None).count()
+        total_receivers = ReceiverSide.objects.filter(user=user).exclude(Receiver_Email=None).count()
+        total_orders = total_senders + total_receivers
+
+       
+
+        total_shipments = InvoiceBill.objects.filter(user=user).exclude(Bill_pdf=None).count()
+        
+
+        data = {
+            "total_orders": total_orders,
+           
+            "total_shipments": total_shipments
+            
+        }
+
+        return JsonResponse({"message":"Data sent successfully","data":data},status=200)
+       except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            return JsonResponse({"message": "An error occurred while processing the request"}, status=500)
+     else:
         return JsonResponse({"message":"Invalid request"},status=405)

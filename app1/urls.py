@@ -10,5 +10,7 @@ urlpatterns = [
     path('get_product',views.get_product_details,name='get_product_details'),
     path('get_productDetails', views.get_product_foredit, name='get_product_foredit'),
     path('totalStocks',views.totalItems,name='totalItems'),
+    path('totalOrders',views.totalOrders,name='totalOrders'),
+    path('totalShipments',views.totalShipments,name='totalShipments'),
     path('sendEmail',views.sent_notification,name='sent_notification'),
 ]
