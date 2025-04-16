@@ -30,9 +30,6 @@ def add_item_inventory(request):
 
        data = json.loads(request.body)
        print(data)
-      #  if not request.user.is_authenticated:
-      #     return JsonResponse({"message":"User not authenticated"},status=401)
-      
       #  Warehouse = Warehouse.objects.get(user=request.user)
        product_obj = Inventory.objects.create(
          ProductName = data.get("productName",""),
@@ -41,7 +38,7 @@ def add_item_inventory(request):
          ProductPrice =float(data.get("productPrice",0)),
          Product_Rejected = int(data.get("ProductRejected",0)),
          Transaction_type = data.get("transactionType",""),
-         ProductRestock = data.get("productRestock",0),
+         ProductRestock = int(data.get("productRestock",0)),
          user=user
        )
 
@@ -124,6 +121,7 @@ def get_product_details(request):
                 return JsonResponse({"message": "User not authenticated"}, status=401)
          products_obj = Inventory.objects.filter(user=user)
          product_list = list(products_obj.values())
+         print(product_list)
          return JsonResponse({"message":"Data sent successfully","data":product_list},status=200)
       except Exception as e:
          return JsonResponse({"message":"Invalid request"},status=400)
