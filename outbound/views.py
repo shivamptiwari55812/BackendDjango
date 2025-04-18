@@ -9,6 +9,7 @@ from .utils.email_service import send_mail,EmailMessage
 from invoice.models import InvoiceBill
 from .models import ReceiverSide
 from app1.models import Inventory
+from registration.models import Warehouse
 from inbound.models import SendersSide
 from transport.models import Transporter,Driver
 from invoice.views import generate_invoice_pdf
@@ -62,7 +63,7 @@ WarehouseMini Team
                 message.format(
                     receiver_name=Receiver_obj.ReceiverCompany_Name,  
                 ),
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=Warehouse.objects.first().WarehouseCompany_Email,
                 recipient_list=[data.get("ReceiverCompany_Email","")]
 
             )

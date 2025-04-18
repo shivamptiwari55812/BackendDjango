@@ -68,7 +68,7 @@ Best Regards,
                     ProductName =sender_obj.ProductName,
                     ProductQuantity =sender_obj.ProductQuantity
                 ),
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=Warehouse.objects.first().WarehouseCompany_Email,
                 recipient_list=[data.get("SenderCompany_Email","")]
 
             )

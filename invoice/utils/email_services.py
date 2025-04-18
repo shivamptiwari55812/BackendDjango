@@ -10,7 +10,7 @@ def send_email_with_pdf(subject, body, recipient_email, pdf_path):
     email = EmailMessage(
         subject=subject,
         body=body,
-        from_email=settings.EMAIL_HOST_USER,  
+        from_email=Warehouse.objects.first().WarehouseCompany_Email,  
         to=recipient_email,            
     )
     email.attach_file(pdf_path)
