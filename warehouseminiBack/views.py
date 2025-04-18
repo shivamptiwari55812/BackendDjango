@@ -63,7 +63,7 @@ def SignUpview(request):
      except json.JSONDecodeError:
             return JsonResponse({"message": "Invalid JSON format"}, status=400)
     else:
-        return JsonResponse({"message":"Invalid request"},status=400)
+        return JsonResponse({"message":"Invalid request"},status=405)
     
 @csrf_exempt
 def loginView(request):
