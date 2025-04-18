@@ -34,8 +34,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','https://backenddjango-q39m.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'backenddjango-q39m.onrender.com']
 
+CSRF_TRUSTED_ORIGINS = ['https://backenddjango-q39m.onrender.com']
 
 # Application definition
 
