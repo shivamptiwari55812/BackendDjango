@@ -63,7 +63,7 @@ WarehouseMini Team
                 message.format(
                     receiver_name=Receiver_obj.ReceiverCompany_Name,  
                 ),
-                from_email=Warehouse.objects.first().WarehouseCompany_Email,
+                from_email=Warehouse.objects.first().WarehouseEmail,
                 recipient_list=[data.get("ReceiverCompany_Email","")]
 
             )
@@ -71,7 +71,9 @@ WarehouseMini Team
             return JsonResponse({"message":"Data fetched Successully"},status =200)
         
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+          print("Error occurred:", e)
+          return JsonResponse({"error": str(e)}, status=400)
+
 
     return JsonResponse({"error":"Invalid request"},status=400)
 
