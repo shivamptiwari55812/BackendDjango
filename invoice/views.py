@@ -35,8 +35,7 @@ def generate_invoice_pdf(user,Invoice_number):
         except Exception as e:  
             return JsonResponse({"message": "Warehouse not found"}, status=404)
         receiver = ReceiverSide.objects.filter(user=user).first()
-        transporter = Transporter.objects.filter(user=user).first()
-        driver = Driver.objects.filter(Transporter__user=user).first()
+       
     except InvoiceBill.DoesNotExist:
         return JsonResponse({"message": "Invoice not found"}, status=404)
 
@@ -98,7 +97,7 @@ def generate_invoice_pdf(user,Invoice_number):
      ["Mode", "Vehicle No", "From", "Entered Date", "Entered By", "CEWB No", "Multi Vehicle Info"],
      [
         str(receiver.ModeOfTransport or ''),
-        str(driver.Vehicle_Number if driver else ''),  # Safe check for driver
+       
         str(warehouse.WarehouseCity or ''),
         formatted_entered_date,  # Improved date format
         str(warehouse.WarehouseGSTIN or ''),
@@ -154,16 +153,11 @@ def getBillDetails(request):
             return JsonResponse({"error": "Receiver not found"}, status=404)
          print("Shivam1 ")
          Warehouse_obj = Warehouse.objects.filter(user=user).first()
-         Transporter_obj = Transporter.objects.filter(user=user).first()
-         Driver_obj = Driver.objects.filter(Transporter__user=user).first()
-
-         if not Warehouse_obj or not Transporter_obj or not Driver_obj:
-            logger.error("Required associated objects (Warehouse, Transporter, Driver) not found")
-            return JsonResponse({"error": "Required associated objects not found"}, status=404)
-
+        
+       
          invoice_obj = InvoiceBill.objects.create(
             Invoice_number = data.get("Invoice_number",""),
-            Bill_validity = data.get("Bill_validity",""),
+            Bill_validity = data.get("ValidityBill",""),
             ValueOfGoods = int(data.get("ValueOfGoods","")),
             ReasonForTransport = data.get("ReasonForTransport",""),
             CEWBno = int(data.get("CEWBno","")),
@@ -206,8 +200,7 @@ Best Regards,
                    [
         receiver.Receiver_Email,
         Warehouse_obj.WarehouseEmail,
-        Transporter_obj.Transporter_Email,
-        Driver_obj.Driver_Email
+       
     ],
               invoice_pdf
             )

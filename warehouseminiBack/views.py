@@ -20,6 +20,7 @@ from .jwt_utils import generate_jwt
 
 
 @csrf_exempt
+
 def SignUpview(request):
     form = CreateUserForm()
     if request.method == "POST":
@@ -78,6 +79,7 @@ def loginView(request):
             user = authenticate(request,username=form_data['username'],password=form_data['password'])
             
             if user is None:
+                print("Shivam ")
                 return JsonResponse({"message": "Invalid username or password"}, status=401)
             else:
                 OTP.objects.filter(user=user).delete()
@@ -110,7 +112,9 @@ def loginView(request):
         except json.JSONDecodeError:
             return JsonResponse({"message": "Invalid JSON format"}, status=400)
         except Exception as e:
-            return JsonResponse({"message": "Invalid request"}, status=400)
+          print("Error in loginView:", e)
+          return JsonResponse({"message": str(e)}, status=400)
+
     else:
         return JsonResponse({"message": "Invalid request method"}, status=405)
         

@@ -32,7 +32,7 @@ def submit_form_receiver(request):
                 return JsonResponse({"message": "User not authenticated"}, status=401)
             print(request.body)
             data = json.loads(request.body)
-
+            print("1!")
             Receiver_obj = ReceiverSide.objects.create(
                 ReceiverCompany_Name = data.get("ReceiverCompany_Name",""),
                 Receiver_Address =data.get("ReceiverCompany_Address",""),
@@ -67,7 +67,7 @@ WarehouseMini Team
                 recipient_list=[data.get("ReceiverCompany_Email","")]
 
             )
-
+            print("2!")
             return JsonResponse({"message":"Data fetched Successully"},status =200)
         
         except Exception as e:
@@ -75,7 +75,7 @@ WarehouseMini Team
           return JsonResponse({"error": str(e)}, status=400)
 
 
-    return JsonResponse({"error":"Invalid request"},status=400)
+    return JsonResponse({"error":"Invalid request"},status=405)
 
 
 
